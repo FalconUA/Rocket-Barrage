@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <level.h>
-#include <gameobject.h>
 #include <graphicobject.h>
 #include <worldsimulator.h>
 #include <SFML/System.hpp>

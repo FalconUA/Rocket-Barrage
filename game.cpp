@@ -32,9 +32,7 @@ void Game::CheckKey(){
     this->mouse_object.x = mouse_pos.x;
     this->mouse_object.y = mouse_pos.y;
 
-    sf::Keyboard key;
-    int a = 0;
-    int b = 0;
+    sf::Keyboard key;    
     if (key.isKeyPressed(sf::Keyboard::A)) this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_LEFT);
     if (key.isKeyPressed(sf::Keyboard::D)) this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_RIGHT);
     if (key.isKeyPressed(sf::Keyboard::W)) this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_UP);
@@ -104,7 +102,7 @@ void Game::GenerateNextFrame(){
     std::string s(ss.str());
 
     sf::Font font;
-    font.loadFromFile("/home/hav4ik/Game-Development/Tanks/Tanks-local/Resources/UbuntuMono-R.ttf");
+    font.loadFromFile("Resources/UbuntuMono-R.ttf");
     sf::Text text;
     text.setFont(font);
     text.setString(s);

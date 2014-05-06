@@ -100,7 +100,12 @@ int Player::GetHealth()
 }
 void Player::Hit(int damage)
 {
-    this->health -= damage;
+    if (this->health > 0)
+        this->health -= damage;
+    else if (this->health <= 0){
+        this->alive = false;
+        this->position = sf::Vector2f(-10000.0f, -10000.0f);
+    }
 }
 rbw::Team Player::GetTeam()
 {
@@ -518,7 +523,8 @@ bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mouseP
         owner = worldInfo.Players[i];
         if (owner->GetPlayerName() == PlayerName) break;
     }
-    if (owner == NULL) return -1;
+    if (owner == NULL) return false;
+    if (owner->isAlive() == false) return false;
     std::cout << "bounce rocket owner: " << owner->GetPlayerName() << std::endl;
 
     // setting speed vector
@@ -578,7 +584,8 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
         owner = this->worldInfo.Players[i];
         if (owner->GetPlayerName() == PlayerName) break;
     }
-    if (owner == NULL) return -1;
+    if (owner == NULL) return false;
+    if (owner->isAlive() == false) return false;
     std::cout << "Homing missile owner: " << owner->GetPlayerName() << std::endl;
     sf::Vector2f sp = owner->GetPosition();
 
@@ -635,7 +642,9 @@ bool WorldSimulator::AddGrenade(std::string PlayerName, sf::Vector2i mousePositi
         owner = this->worldInfo.Players[i];
         if (owner->GetPlayerName() == PlayerName) break;
     }
-    if (owner == NULL) return -1;
+    if (owner == NULL) return false;
+    if (owner->isAlive() == false) return false;
+
     std::cout << "Grenade owner: " << owner->GetPlayerName() << std::endl;
     sf::Vector2f sp = owner->GetPosition();
 
@@ -674,6 +683,7 @@ bool WorldSimulator::AddMoveRequest(std::string PlayerName, Direction direction)
         }
     }
     if (currPlayer == NULL) return false;
+    if (currPlayer->isAlive() == false) return false;
 
     currPlayer->Move(direction);
 
@@ -766,9 +776,41 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
     }
 
 }
+std::vector< std::string > WorldSimulator::GetDeadPlayers()
+{
+    std::vector< std::string > answer(0,"");
+    for (int i=0; i<this->worldInfo.Players.size(); i++){
+        rbw::Player * tmpPlayer = this->worldInfo.Players[i];
+        if (tmpPlayer->isAlive() == false){
+            answer.push_back(tmpPlayer->GetPlayerName());
+        }
+    }
+    return answer;
+}
 
-
-WorldSimulator::~WorldSimulator(){
+WorldSimulator::~WorldSimulator()
+{
+    rbw::HM_ChainElement * HM_currElement = this->worldInfo.homingMissiles.FirstInChain;
+    while (HM_currElement != NULL){
+        rbw::HM_ChainElement * tmp = HM_currElement;
+        HM_currElement = HM_currElement->next;
+        delete tmp->rocket;
+        delete tmp;
+    }
+    rbw::BB_ChainElement * BB_currElement = this->worldInfo.bouncingBombs.FirstInChain;
+    while (BB_currElement != NULL){
+        rbw::BB_ChainElement * tmp = BB_currElement;
+        BB_currElement = BB_currElement->next;
+        delete tmp->rocket;
+        delete tmp;
+    }
+    rbw::G_ChainElement * G_currElement = this->worldInfo.Grenades.FirstInChain;
+    while (G_currElement != NULL){
+        rbw::G_ChainElement * tmp = G_currElement;
+        G_currElement = G_currElement->next;
+        delete tmp->rocket;
+        delete tmp;
+    }
 }
 
 }; // end of namespace rbw

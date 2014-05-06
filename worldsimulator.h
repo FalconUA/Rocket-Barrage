@@ -205,8 +205,9 @@ public:
     bool AddMoveRequest(std::string PlayerName, rbw::Direction direction);    
     float SimulateNextStep(); // returns elapsed time since last world step
 
-// this function will be used by user
+    std::vector< std::string > GetDeadPlayers();
     bool GetObjects(std::vector< GraphicObject >* objects);
+
 private:    
     rbw::WorldInformation worldInfo;
 };
