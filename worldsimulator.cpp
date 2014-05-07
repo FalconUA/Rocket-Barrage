@@ -35,21 +35,17 @@ void WorldObject::SetSpeed(sf::Vector2f newSpeed)
  */
 
 Player::Player(std::string PlayerName, Team team, rbw::spawnPos * spawnPosition, rbw::WorldInformation * worldInfo)
-{
-    this->alive = true;
-    this->health = rbw::INITIAL_HEALTH_POINT;
+{    
     this->PlayerName = PlayerName;
     this->team = team;
-    this->type = rbw::TYPE_PLAYER;
-    this->position.x = spawnPosition->x;
-    this->position.y = spawnPosition->y;
+    this->type = rbw::TYPE_PLAYER;    
     this->spawnPosition = spawnPosition;
-    this->spawnPosition->occupied = true;
-    this->health = rbw::INITIAL_HEALTH_POINT;
+    this->spawnPosition->occupied = true; 
     this->worldInfo = worldInfo;
     this->Kill = 0;
     this->DamageDealt = 0;
     this->Death = 0;
+    this->Respawn();
 }
 std::string Player::GetPlayerName()
 {
@@ -72,8 +68,8 @@ void Player::Move(rbw::Direction direction)
     // new FPS = k;
     // so, (X*60/1000) * (1000/k) pixels per frame, k - time per frame
 
-    float velocity = mSpeedTimeFactor * rbw::MAX_PLAYER_SPEED; // in pixels
-    velocity = this->worldInfo->ElapsedTime.asMilliseconds() * rbw::MAX_PLAYER_SPEED;
+    float velocity = mSpeedTimeFactor * rbw::GameParam::MAX_PLAYER_SPEED; // in pixels
+    velocity = this->worldInfo->ElapsedTime.asMilliseconds() * rbw::GameParam::MAX_PLAYER_SPEED;
     p_new.x *= velocity;
     p_new.y *= velocity;
 
@@ -120,9 +116,12 @@ bool Player::Hit(int damage)
 void Player::Respawn()
 {
     this->alive = true;
-    this->health = rbw::INITIAL_HEALTH_POINT;
+    this->health = rbw::GameParam::INITIAL_HEALTH_POINT;
     this->position.x = this->spawnPosition->x;
     this->position.y = this->spawnPosition->y;
+    this->HomingMissilesLeft = rbw::GameParam::MAX_NUMBER_OF_HOMING_MISSILES_ALLOWED;
+    this->BouncingBombsLeft = rbw::GameParam::MAX_NUMBER_OF_BOUNCING_BOMBS_ALLOWED;
+    this->GrenadesLeft = rbw::GameParam::MAX_NUMBER_OF_GRENADES_ALLOWED;
 }
 
 rbw::Team Player::GetTeam()
@@ -143,10 +142,11 @@ HomingMissile::HomingMissile(Player *owner, Player *target, rbw::HM_ChainElement
     this->LocationInChain = location;
     this->worldInfo = worldInfo;
     this->haveToBeDestroyed = false;
+    this->owner->HomingMissilesLeft--;
 }
 rbw::HomingMissile::~HomingMissile()
 {
-
+    this->owner->HomingMissilesLeft++;
 }
 rbw::Player * HomingMissile::GetOwner()
 {
@@ -169,7 +169,7 @@ void HomingMissile::SimulateNextStep()
 
 
     double len = sqrt(new_speedvec.x * new_speedvec.x + new_speedvec.y * new_speedvec.y);  
-    float velocity = this->worldInfo->ElapsedTime.asMilliseconds() * rbw::MAX_HOMING_MISSILE_SPEED;
+    float velocity = this->worldInfo->ElapsedTime.asMilliseconds() * rbw::GameParam::MAX_HOMING_MISSILE_SPEED;
 
     double koef = velocity / len;
     //std::cout << "koef: " << koef << std::endl;
@@ -184,8 +184,8 @@ void HomingMissile::SimulateNextStep()
     if (explosionPoint != sf::Vector2f(-1.0,-1.0))
     {        
         if (victim != NULL){
-            bool killed = victim->Hit(rbw::HOMING_MISSILE_DAMAGE);
-            this->owner->DamageDealt += rbw::HOMING_MISSILE_DAMAGE;
+            bool killed = victim->Hit(rbw::GameParam::HOMING_MISSILE_DAMAGE);
+            this->owner->DamageDealt += rbw::GameParam::HOMING_MISSILE_DAMAGE;
             if (killed){
                 this->owner->Kill++;
                 victim->Death++;
@@ -266,11 +266,12 @@ BouncingBomb::BouncingBomb(Player *owner, rbw::BB_ChainElement * location, World
     this->type = rbw::TYPE_BOUNCING_BOMB;
     this->LocationInChain = location;
     this->worldInfo = worldInfo;
-    this->haveToBeDestroyed = false;
+    this->haveToBeDestroyed = false;    
+    this->owner->BouncingBombsLeft--;
 }
 BouncingBomb::~BouncingBomb()
 {
-
+    this->owner->BouncingBombsLeft++;
 }
 rbw::Player * BouncingBomb::GetOwner()
 {
@@ -282,15 +283,15 @@ void BouncingBomb::SimulateNextStep()
     rbw::Player * victim = NULL;
 
     sf::Vector2f explosionPoint;
-    if (this->BounceCount < rbw::MAX_BOUNCE_NUMBER)
+    if (this->BounceCount < rbw::GameParam::MAX_BOUNCE_NUMBER)
         explosionPoint = this->getCollisionWithPlayers(&victim);
     else
         explosionPoint = this->getExplosionPoint(&victim);
     if (explosionPoint != sf::Vector2f(-1.0f,-1.0f))
     {        
         if (victim != NULL){
-            bool killed = victim->Hit(rbw::BOUNCING_BOMB_DAMAGE);
-            this->owner->DamageDealt += rbw::BOUNCING_BOMB_DAMAGE;
+            bool killed = victim->Hit(rbw::GameParam::BOUNCING_BOMB_DAMAGE);
+            this->owner->DamageDealt += rbw::GameParam::BOUNCING_BOMB_DAMAGE;
             if (killed){
                 this->owner->Kill++;
                 victim->Death++;
@@ -418,7 +419,7 @@ Grenade::Grenade(Player *owner, G_ChainElement *location, WorldInformation *worl
 
     float ver = (sx + dx)/2.;
     float height = fabs((ver - dx)*(ver - sx));
-    float koef = GRENADE_HEIGHT / height;
+    float koef = rbw::GameParam::GRENADE_HEIGHT / height;
 
     this->Equation.x = koef;
     this->Equation.y = - koef * (sx + dx);
@@ -428,7 +429,7 @@ Grenade::Grenade(Player *owner, G_ChainElement *location, WorldInformation *worl
     float b = (float) this->DestinationPoint.y - this->StartingPoint.y;
 
     double len = sqrt(a*a + b*b);
-    float velocity = len / (float) rbw::GRENADE_TIME_TO_LIVE;
+    float velocity = len / (float) rbw::GameParam::GRENADE_TIME_TO_LIVE;
 
     velocity *= this->worldInfo->ElapsedTime.asMilliseconds();
 
@@ -441,10 +442,12 @@ Grenade::Grenade(Player *owner, G_ChainElement *location, WorldInformation *worl
     this->speed = sf::Vector2f(a,b);
     this->ProjectionToGround = this->position;
     this->zoom_coefficient = 1.0f;
+
+    this->owner->GrenadesLeft--;
 }
 Grenade::~Grenade()
 {
-
+    this->owner->GrenadesLeft++;
 }
 
 bool Grenade::HaveToBeDestroyed()
@@ -475,8 +478,8 @@ void Grenade::SimulateNextStep()
             sf::Vector2f pos = tmpPlayer->GetPosition();
             sf::Vector2f dis (pos.x - this->position.x, pos.y - this->position.y);
             float dis_squared = (dis.x * dis.x) + (dis.y * dis.y);
-            if (dis_squared < rbw::GRENADE_RADIUS_OF_EFFECT_SQUARED + fEPS){
-                bool killed = tmpPlayer->Hit(rbw::GRENADE_DAMAGE);
+            if (dis_squared < rbw::GameParam::GRENADE_RADIUS_OF_EFFECT_SQUARED + rbw::fEPS){
+                bool killed = tmpPlayer->Hit(rbw::GameParam::GRENADE_DAMAGE);
                 this->owner->DamageDealt++;
                 if (killed){
                     this->owner->Kill++;
@@ -518,7 +521,7 @@ void Grenade::SimulateNextStep()
         this->position.x = this->ProjectionToGround.x;
         this->position.y = this->ProjectionToGround.y + ty;
 
-        this->zoom_coefficient = 1.0 + fabs(ty/rbw::GRENADE_HEIGHT);
+        this->zoom_coefficient = 1.0 + fabs(ty/rbw::GameParam::GRENADE_HEIGHT);
     }
 
 }
@@ -590,6 +593,8 @@ bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mouseP
     }
     if (owner == NULL) return false;
     if (owner->isAlive() == false) return false;
+    if (owner->BouncingBombsLeft <= 0) return false;
+
     std::cout << "bounce rocket owner: " << owner->GetPlayerName() << std::endl;
 
     // setting speed vector
@@ -607,7 +612,7 @@ bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mouseP
     // so, (X*60/1000) * (1000/k) pixels per frame, k - time per frame
 
     //float velocity = mSpeedTimeFactor * rbw::MAX_HOMING_MISSILE_SPEED; // in pixels
-    float velocity = this->worldInfo.ElapsedTime.asMilliseconds() * rbw::MAX_BOUNCING_BOMB_SPEED;
+    float velocity = this->worldInfo.ElapsedTime.asMilliseconds() * rbw::GameParam::MAX_BOUNCING_BOMB_SPEED;
 
     double koef = velocity / len;
 
@@ -651,6 +656,8 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
     }
     if (owner == NULL) return false;
     if (owner->isAlive() == false) return false;
+    if (owner->HomingMissilesLeft <= 0) return false;
+
     std::cout << "Homing missile owner: " << owner->GetPlayerName() << std::endl;
     sf::Vector2f sp = owner->GetPosition();
 
@@ -709,6 +716,7 @@ bool WorldSimulator::AddGrenade(std::string PlayerName, sf::Vector2i mousePositi
     }
     if (owner == NULL) return false;
     if (owner->isAlive() == false) return false;
+    if (owner->GrenadesLeft <= 0) return false;
 
     std::cout << "Grenade owner: " << owner->GetPlayerName() << std::endl;
     sf::Vector2f sp = owner->GetPosition();
@@ -852,6 +860,10 @@ std::vector< rbw::PlayerExportInformation > WorldSimulator::ExportPlayerInfo()
         tmpExportInfo.isDead = !tmpPlayer->isAlive();
         tmpExportInfo.Kill = tmpPlayer->Kill;
         tmpExportInfo.PlayerName = tmpPlayer->GetPlayerName();
+
+        tmpExportInfo.BouncingBombsLeft = tmpPlayer->BouncingBombsLeft;
+        tmpExportInfo.HomingMissilesLeft = tmpPlayer->HomingMissilesLeft;
+        tmpExportInfo.GrenadesLeft = tmpPlayer->GrenadesLeft;
 
         answer.push_back(tmpExportInfo);
     }

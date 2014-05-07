@@ -75,6 +75,11 @@ typedef struct
     int Kill;
     int Death;
     int DamageDealt;
+
+    int HomingMissilesLeft;
+    int BouncingBombsLeft;
+    int GrenadesLeft;
+
     bool isDead;
 } PlayerExportInformation;
 
@@ -135,8 +140,12 @@ public:
     bool Hit(int damage); // the true result means that this player was killed right after calling this function
 
     int Kill;
-    int Death;
+    int Death;    
     int DamageDealt;
+
+    int HomingMissilesLeft;
+    int BouncingBombsLeft;
+    int GrenadesLeft;
 
     rbw::PlayerExportInformation Export();
 private:
