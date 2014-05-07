@@ -25,8 +25,6 @@ unix|win32: LIBS += -lsfml-system
 
 HEADERS += \
     level.h \
-    Tiled/tinystr.h \
-    Tiled/tinyxml.h \
     Tiny/tinyxml.h \
     Tiny/tinystr.h \
     Tiny/tinyxml2.h \

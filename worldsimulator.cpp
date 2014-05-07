@@ -119,6 +119,7 @@ bool Player::Hit(int damage)
 }
 void Player::Respawn()
 {
+    this->alive = true;
     this->health = rbw::INITIAL_HEALTH_POINT;
     this->position.x = this->spawnPosition->x;
     this->position.y = this->spawnPosition->y;
@@ -863,6 +864,23 @@ std::vector< std::string > WorldSimulator::ExportEvents()
     this->worldInfo.WorldEvents.clear();
     return answer;
 }
+bool WorldSimulator::RoundEnded()
+{
+    bool allBlackAreDead = true;
+    for (int i=0; i<this->worldInfo.Players.size(); i++){
+        rbw::Player * tmpPlayer = this->worldInfo.Players[i];
+        if (tmpPlayer->GetTeam() == rbw::TEAM_BLACK)
+            allBlackAreDead = (allBlackAreDead && (tmpPlayer->isAlive() == false));
+    }
+    bool allWhiteAreDead = true;
+    for (int i=0; i<this->worldInfo.Players.size(); i++){
+        rbw::Player * tmpPlayer = this->worldInfo.Players[i];
+        if (tmpPlayer->GetTeam() == rbw::TEAM_WHITE)
+            allWhiteAreDead = (allWhiteAreDead && (tmpPlayer->isAlive() == false));
+    }
+    return (allBlackAreDead || allWhiteAreDead);
+}
+
 bool WorldSimulator::RoundDraw()
 {
 

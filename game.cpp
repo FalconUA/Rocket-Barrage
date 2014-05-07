@@ -85,7 +85,7 @@ void Game::RespondToEvent(sf::Event *event){
 }
 
 void Game::GenerateNextFrame(){
-    float ElapsedTime = server->SimulateNextStep();
+    float ElapsedTime = server->SimulateNextStep();    
     this->server->GetObjects(&this->Objects);
     this->level->Draw(*this->window);
     for (int i=0; i<this->Objects.size(); i++){
@@ -114,4 +114,8 @@ void Game::GenerateNextFrame(){
     text.setPosition(sf::Vector2f( winSize.x - 100, 25 ));
 
     this->window->draw(text);
+
+    if (server->RoundEnded())
+        server->RoundDraw();
+
 }

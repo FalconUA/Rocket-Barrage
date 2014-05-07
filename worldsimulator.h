@@ -106,8 +106,7 @@ public:
 
     sf::Vector2f GetPosition();
     rbw::ObjectType GetType();
-    sf::Vector2f GetSpeed();
-    sf::Vector2f GetIntegerPosition();
+    sf::Vector2f GetSpeed();    
 
 protected:
     sf::Vector2f position;
@@ -235,6 +234,7 @@ public:
     std::vector< rbw::PlayerExportInformation > ExportPlayerInfo();
     bool GetObjects(std::vector< GraphicObject >* objects);
 
+    bool RoundEnded();
     bool RoundDraw();
 private:    
     rbw::WorldInformation worldInfo;    
