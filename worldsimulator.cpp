@@ -34,16 +34,22 @@ void WorldObject::SetSpeed(sf::Vector2f newSpeed)
  * a type of objects in this GameWorld
  */
 
-Player::Player(std::string PlayerName, Team team, sf::Vector2f spawnPosition, rbw::WorldInformation * worldInfo)
+Player::Player(std::string PlayerName, Team team, rbw::spawnPos * spawnPosition, rbw::WorldInformation * worldInfo)
 {
     this->alive = true;
     this->health = rbw::INITIAL_HEALTH_POINT;
     this->PlayerName = PlayerName;
     this->team = team;
     this->type = rbw::TYPE_PLAYER;
-    this->position = spawnPosition;
+    this->position.x = spawnPosition->x;
+    this->position.y = spawnPosition->y;
+    this->spawnPosition = spawnPosition;
+    this->spawnPosition->occupied = true;
     this->health = rbw::INITIAL_HEALTH_POINT;
     this->worldInfo = worldInfo;
+    this->Kill = 0;
+    this->DamageDealt = 0;
+    this->Death = 0;
 }
 std::string Player::GetPlayerName()
 {
@@ -98,15 +104,26 @@ int Player::GetHealth()
 {
     return this->health;
 }
-void Player::Hit(int damage)
+bool Player::Hit(int damage)
 {
-    if (this->health > 0)
+    if (this->health > 0){
         this->health -= damage;
-    else if (this->health <= 0){
-        this->alive = false;
-        this->position = sf::Vector2f(-10000.0f, -10000.0f);
+        if (this->health <= 0){
+            this->alive = false;
+            this->position = sf::Vector2f(-10000.0f, -10000.0f);
+            return true;
+        }
+        return false;
     }
+    return false;
 }
+void Player::Respawn()
+{
+    this->health = rbw::INITIAL_HEALTH_POINT;
+    this->position.x = this->spawnPosition->x;
+    this->position.y = this->spawnPosition->y;
+}
+
 rbw::Team Player::GetTeam()
 {
     return this->team;
@@ -166,7 +183,14 @@ void HomingMissile::SimulateNextStep()
     if (explosionPoint != sf::Vector2f(-1.0,-1.0))
     {        
         if (victim != NULL){
-            victim->Hit(rbw::BOUNCING_BOMB_DAMAGE);
+            bool killed = victim->Hit(rbw::HOMING_MISSILE_DAMAGE);
+            this->owner->DamageDealt += rbw::HOMING_MISSILE_DAMAGE;
+            if (killed){
+                this->owner->Kill++;
+                victim->Death++;
+                std::string newEventMsg(this->owner->GetPlayerName() + " has killed " + victim->GetPlayerName() + "with a Homing Missile");
+                this->worldInfo->WorldEvents.push_back(newEventMsg);
+            }
         }
         // here we have to destroy this current chain element (currElement)
         rbw::HM_ChainElement * previousEl = this->LocationInChain->prev;
@@ -264,7 +288,15 @@ void BouncingBomb::SimulateNextStep()
     if (explosionPoint != sf::Vector2f(-1.0f,-1.0f))
     {        
         if (victim != NULL){
-            victim->Hit(rbw::BOUNCING_BOMB_DAMAGE);
+            bool killed = victim->Hit(rbw::BOUNCING_BOMB_DAMAGE);
+            this->owner->DamageDealt += rbw::BOUNCING_BOMB_DAMAGE;
+            if (killed){
+                this->owner->Kill++;
+                victim->Death++;
+                std::string newEventMsg(this->owner->GetPlayerName() + " has killed " + victim->GetPlayerName() + "with a Bouncing Bomb");
+                this->worldInfo->WorldEvents.push_back(newEventMsg);
+
+            }
         }
         rbw::BB_ChainElement * previousEl = currElement->prev;
         rbw::BB_ChainElement * nextEl = currElement->next;
@@ -443,7 +475,14 @@ void Grenade::SimulateNextStep()
             sf::Vector2f dis (pos.x - this->position.x, pos.y - this->position.y);
             float dis_squared = (dis.x * dis.x) + (dis.y * dis.y);
             if (dis_squared < rbw::GRENADE_RADIUS_OF_EFFECT_SQUARED + fEPS){
-                tmpPlayer->Hit(rbw::GRENADE_DAMAGE);
+                bool killed = tmpPlayer->Hit(rbw::GRENADE_DAMAGE);
+                this->owner->DamageDealt++;
+                if (killed){
+                    this->owner->Kill++;
+                    tmpPlayer->Death++;
+                    std::string newEventMsg(this->owner->GetPlayerName() + " has killed " + tmpPlayer->GetPlayerName() + "with a Grenade");
+                    this->worldInfo->WorldEvents.push_back(newEventMsg);
+                }
             }
         }
 
@@ -492,6 +531,7 @@ void Grenade::SimulateNextStep()
 WorldSimulator::WorldSimulator()
 {
     this->worldInfo.Players.clear();
+    this->worldInfo.spawnPositions.clear();
 
     this->worldInfo.homingMissiles.FirstInChain = NULL;
     this->worldInfo.bouncingBombs.FirstInChain = NULL;
@@ -500,7 +540,7 @@ WorldSimulator::WorldSimulator()
     this->worldInfo.bouncingBombs.LastInChain = NULL;
 
     this->worldInfo.Grenades.FirstInChain = NULL;
-    this->worldInfo.Grenades.LastInChain = NULL;
+    this->worldInfo.Grenades.LastInChain = NULL;       
 }
 void WorldSimulator::Init(Level *level, float FPS)
 {
@@ -508,12 +548,36 @@ void WorldSimulator::Init(Level *level, float FPS)
     this->worldInfo.FPS = FPS;
     this->worldInfo.wallForPlayer = level->GetObjects("wall");
     this->worldInfo.wallForRocket = level->GetObjects("wrocket");
+
+    std::vector< Object > spawn = level->GetObjects("spawn");
+    for (int i=0; i<spawn.size(); i++){
+        rbw::spawnPos * newpos = new rbw::spawnPos;
+        newpos->occupied = false;
+        if (spawn[i].rect.width == 0)
+            newpos->team = rbw::TEAM_BLACK;
+        else if (spawn[i].rect.width == 1)
+            newpos->team = rbw::TEAM_WHITE;
+        newpos->x = spawn[i].rect.left;
+        newpos->y = spawn[i].rect.top;
+        this->worldInfo.spawnPositions.push_back(newpos);
+    }
 }
 bool WorldSimulator::AddPlayer(std::string PlayerName, Team team)
 {
-    rbw::Player * newPlayer = new Player(PlayerName, team, sf::Vector2f(40.0f, 40.0f), &(this->worldInfo));
-    std::cout << "Player added: " << newPlayer->GetPlayerName() << std::endl;
+    rbw::spawnPos * PlayerSpawnPosition = NULL;
+    for (int i=0; i<this->worldInfo.spawnPositions.size(); i++){
+        PlayerSpawnPosition = this->worldInfo.spawnPositions[i];
+        if ((PlayerSpawnPosition->occupied == false) &&
+                (PlayerSpawnPosition->team == team))
+            break;
+    }
+    if ((PlayerSpawnPosition->occupied == true) || (PlayerSpawnPosition->team != team))
+        return false; // no spawn position for this player
+                      // maximum player number reached
+    rbw::Player * newPlayer = new Player(PlayerName, team, PlayerSpawnPosition, &(this->worldInfo));
+
     this->worldInfo.Players.push_back(newPlayer);
+    this->worldInfo.WorldEvents.push_back("player " + PlayerName + " has joined the game");
     return true;
 }
 bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mousePosition)
@@ -776,16 +840,67 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
     }
 
 }
-std::vector< std::string > WorldSimulator::GetDeadPlayers()
+std::vector< rbw::PlayerExportInformation > WorldSimulator::ExportPlayerInfo()
 {
-    std::vector< std::string > answer(0,"");
+    std::vector< rbw::PlayerExportInformation > answer(0);
     for (int i=0; i<this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
-        if (tmpPlayer->isAlive() == false){
-            answer.push_back(tmpPlayer->GetPlayerName());
-        }
+        rbw::PlayerExportInformation tmpExportInfo;
+        tmpExportInfo.DamageDealt = tmpPlayer->DamageDealt;
+        tmpExportInfo.Death = tmpPlayer->Death;
+        tmpExportInfo.isDead = !tmpPlayer->isAlive();
+        tmpExportInfo.Kill = tmpPlayer->Kill;
+        tmpExportInfo.PlayerName = tmpPlayer->GetPlayerName();
+
+        answer.push_back(tmpExportInfo);
     }
     return answer;
+}
+std::vector< std::string > WorldSimulator::ExportEvents()
+{
+    std::vector< std::string > answer;
+    answer = this->worldInfo.WorldEvents;
+    this->worldInfo.WorldEvents.clear();
+    return answer;
+}
+bool WorldSimulator::RoundDraw()
+{
+
+    rbw::HM_ChainElement * HM_currElement = this->worldInfo.homingMissiles.FirstInChain;
+    while (HM_currElement != NULL){
+        rbw::HM_ChainElement * tmp = HM_currElement;
+        HM_currElement = HM_currElement->next;
+        delete tmp->rocket;
+        delete tmp;
+    }
+    rbw::BB_ChainElement * BB_currElement = this->worldInfo.bouncingBombs.FirstInChain;
+    while (BB_currElement != NULL){
+        rbw::BB_ChainElement * tmp = BB_currElement;
+        BB_currElement = BB_currElement->next;
+        delete tmp->rocket;
+        delete tmp;
+    }
+    rbw::G_ChainElement * G_currElement = this->worldInfo.Grenades.FirstInChain;
+    while (G_currElement != NULL){
+        rbw::G_ChainElement * tmp = G_currElement;
+        G_currElement = G_currElement->next;
+        delete tmp->rocket;
+        delete tmp;
+    }
+    this->worldInfo.homingMissiles.FirstInChain = NULL;
+    this->worldInfo.bouncingBombs.FirstInChain = NULL;
+
+    this->worldInfo.homingMissiles.LastInChain = NULL;
+    this->worldInfo.bouncingBombs.LastInChain = NULL;
+
+    this->worldInfo.Grenades.FirstInChain = NULL;
+    this->worldInfo.Grenades.LastInChain = NULL;
+
+    for (int i=0; i<this->worldInfo.Players.size(); i++){
+        rbw::Player * tmpPlayer = this->worldInfo.Players[i];
+        tmpPlayer->Respawn();
+    }
+    return true;
 }
 
 WorldSimulator::~WorldSimulator()
@@ -811,6 +926,17 @@ WorldSimulator::~WorldSimulator()
         delete tmp->rocket;
         delete tmp;
     }
+
+    for (int i=0; i<this->worldInfo.spawnPositions.size(); i++){
+        rbw::spawnPos * tmpPos = this->worldInfo.spawnPositions[i];
+        delete tmpPos;
+    }
+
+    for (int i=0; i<this->worldInfo.Players.size(); i++){
+        rbw::Player * tmpPlayer = this->worldInfo.Players[i];
+        delete tmpPlayer;
+    }
+
 }
 
 }; // end of namespace rbw

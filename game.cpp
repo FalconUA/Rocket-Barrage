@@ -79,7 +79,9 @@ void Game::RespondToEvent(sf::Event *event){
             this->Switch_mouse = !this->Switch_mouse;
             this->mouse_object.type = (this->Switch_mouse)? rbw::Graphic::MOUSE_POINTER_SWITCHED : rbw::Graphic::MOUSE_POINTER_NORMAL;
         }
-    }
+        if (event->key.code == sf::Keyboard::M)
+            this->server->RoundDraw();
+    }    
 }
 
 void Game::GenerateNextFrame(){

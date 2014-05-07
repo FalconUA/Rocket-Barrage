@@ -42,7 +42,8 @@ private:
     int firstTileID;
     sf::Rect<float> drawingBounds;
     sf::Texture tilesetImage;
-    std::vector<Object> objects;
+
+    std::vector<Object> objects;    
     std::vector<Layer> layers;
 };
 

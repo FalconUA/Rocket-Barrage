@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="25" height="20" tilewidth="33" tileheight="33">
  <tileset firstgid="1" name="Desert" tilewidth="32" tileheight="32" spacing="1" margin="1">
-  <image source="/home/hav4ik/Game-Development/Tanks/Tanks-local/Resources/tmw_desert_spacing.png" width="265" height="199"/>
+  <image source="Resources/tmw_desert_spacing.png" width="265" height="199"/>
  </tileset>
  <tileset firstgid="49" source="desert.tsx"/>
  <layer name="walls" width="25" height="20">
@@ -1034,4 +1034,12 @@
   <object name="wrocket" x="800" y="2" width="23" height="657"/>
   <object name="wrocket" x="4" y="637" width="814" height="21"/>
  </objectgroup>
+ <objectgroup name="SpawnPositions" width="25" height="20">
+  <object name="spawn" x="82" y="148" width="0" height="0"/>
+  <object name="spawn" x="742" y="148" width="1" height="0"/>
+  <object name="spawn" x="82" y="511" width="0" height="0"/>
+  <object name="spawn" x="742" y="511" width="1" height="0"/>
+ </objectgroup>
+
 </map>
+

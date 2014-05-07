@@ -62,23 +62,40 @@ typedef struct {
    BB_ChainElement * LastInChain;
 } BouncingBombChain;
 
+typedef struct {
+    rbw::Team team;
+    int x;
+    int y;
+    bool occupied;
+} spawnPos;
+
+typedef struct
+{
+    std::string PlayerName;
+    int Kill;
+    int Death;
+    int DamageDealt;
+    bool isDead;
+} PlayerExportInformation;
 
 
 typedef struct {
     float FPS;
-    Level * level;
 
-    std::vector< rbw::Player* > Players;
+    sf::Clock WorldClock;
+    sf::Time ElapsedTime;
 
     rbw::HomingMissileChain homingMissiles;
     rbw::BouncingBombChain bouncingBombs;
     rbw::GrenadeChain Grenades;
 
+    Level * level;
+
+    std::vector< rbw::Player* > Players;    
     std::vector< Object > wallForPlayer;
     std::vector< Object > wallForRocket;
-
-    sf::Clock WorldClock;
-    sf::Time ElapsedTime;
+    std::vector< rbw::spawnPos* > spawnPositions;
+    std::vector< std::string > WorldEvents;
 } WorldInformation;
 
 class WorldObject
@@ -106,21 +123,30 @@ class Player: public WorldObject
 public:
     Player(std::string PlayerName,
            rbw::Team team,
-           sf::Vector2f spawnPosition,
+           rbw::spawnPos * spawnPosition,
            rbw::WorldInformation * worldInfo);
     std::string GetPlayerName();
 
     void Move(rbw::Direction direction);
+    void Respawn();
 
     bool isAlive();
     rbw::Team GetTeam();
     int GetHealth();
-    void Hit(int damage);
+    bool Hit(int damage); // the true result means that this player was killed right after calling this function
+
+    int Kill;
+    int Death;
+    int DamageDealt;
+
+    rbw::PlayerExportInformation Export();
 private:
     rbw::Team team;
     std::string PlayerName;
     int health;
     bool alive;
+
+    rbw::spawnPos * spawnPosition;
 };
 
 
@@ -198,18 +224,20 @@ public:
 /* External functions:
  * these functions will be used by server!
  */
-    bool AddPlayer(std::string PlayerName, rbw::Team team);
+    bool AddPlayer(std::string PlayerName, rbw::Team team); // the false return means that current map is not designed for more players
     bool AddHomingMissile(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddBouncingBomb(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddGrenade(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddMoveRequest(std::string PlayerName, rbw::Direction direction);    
     float SimulateNextStep(); // returns elapsed time since last world step
 
-    std::vector< std::string > GetDeadPlayers();
+    std::vector< std::string > ExportEvents();
+    std::vector< rbw::PlayerExportInformation > ExportPlayerInfo();
     bool GetObjects(std::vector< GraphicObject >* objects);
 
+    bool RoundDraw();
 private:    
-    rbw::WorldInformation worldInfo;
+    rbw::WorldInformation worldInfo;    
 };
 
 }; // end of namespace rbw
