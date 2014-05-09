@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     game.cpp \
     graphicobject.cpp \
     worldsimulator.cpp \
-    worldphysic.cpp
+    worldphysic.cpp \
+    graphicengine.cpp
 
 INCLUDEPATH += Tiled/
 
@@ -32,6 +33,8 @@ HEADERS += \
     graphicobject.h \
     worldsimulator.h \
     worldphysic.h \
-    worldconstant.h
+    worldconstant.h \
+    graphicengine.h \
+    rbwincludes.h
 
 OTHER_FILES +=

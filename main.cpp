@@ -8,7 +8,7 @@
 
 const float FPS = 60.0f;
 
-int main(int argc, int * argv[]){
+int main(int argc, char * argv[]){
     //char basePath[255] = "";
     //_fullpath(basePath, argv[0], sizeof(basePath));
 

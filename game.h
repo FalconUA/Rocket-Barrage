@@ -7,6 +7,7 @@
 #include <graphicobject.h>
 #include <worldsimulator.h>
 #include <SFML/System.hpp>
+#include <graphicengine.h>
 
 using namespace rbw;
 
@@ -25,7 +26,10 @@ private:
     GraphicObject mouse_object;
     std::string MyName;
     sf::RenderWindow * window;
-    WorldSimulator * server;
+
+    rbw::WorldSimulator * server;
+    rbw::GraphicEngine * graphic;
+
     std::vector< GraphicObject > Objects;
     Level  * level;
     bool Switch_mouse;

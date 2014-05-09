@@ -33,7 +33,12 @@ namespace GameParam
     const bool HOMING_MISSILE_RECHARGE_AFTER_EXPLOSING = true;
     const bool BOUNCING_BOMB_RECHARGE_AFTER_EXPLOSING = true;
     const bool GRENADE_RECHARGE_AFTER_EXPLOSING = true;
-};
+
+    const float PLAYER_HITBOX_RADIUS = 16.0f;
+    const float HOMING_MISSILE_HITBOX_RADIUS = 8.0f;
+    const float BOUNCING_BOMB_HITBOX_RADIUS = 8.0f;
+    const float GRENADE_HITBOX_RADIUS = 8.0f;
+}; // end of namespace gameparam
 
 typedef enum {
     TYPE_PLAYER,
@@ -43,10 +48,11 @@ typedef enum {
 
 typedef enum {
     DIRECTION_NODIRECTION,
+
     DIRECTION_UP,
     DIRECTION_DOWN,
     DIRECTION_LEFT,
-    DIRECTION_RIGHT
+    DIRECTION_RIGHT,
 } Direction;
 
 typedef enum {
@@ -55,17 +61,40 @@ typedef enum {
 } Team;
 
 namespace Graphic{
-enum GraphicObjectType {
-    PLAYER,
-    FOLLOW_ROCKET,
-    BOUNCE_ROCKET,
-    GRENADE,
-    MOUSE_POINTER_NORMAL,
-    MOUSE_POINTER_SWITCHED
-};
+    enum GraphicObjectType {
+        PLAYER,
+        FOLLOW_ROCKET,
+        BOUNCE_ROCKET,
+        GRENADE,
+        MOUSE_POINTER_NORMAL,
+        MOUSE_POINTER_SWITCHED,
 
-}
+        HOMINGMISSILE_EXPLOSION,
+        BOUNCINGBOMB_EXPLOSION,
+        GRENADE_EXPLOSION,
+        PLAYER_EXPLOSION
+    };
 
-};
+    const std::string BLACK_TANK_IMAGE_FILENAME = "tank_black.png";
+    const std::string WHITE_TANK_IMAGE_FILENAME = "tank_white.png";
+    const std::string HOMING_MISSILE_IMAGE_FILENAME = "homingmissile.png";
+    const std::string BOUNCING_BOMB_IMAGE_FILENAME = "bouncingbomb.gif";
+    const std::string GRENADE_IMAGE_FILENAME = "grenade.png";
+    const std::string HM_EXPLOSION_ANIMATION_FILENAME = "explosion_hm.png";
+    const std::string BB_EXPLOSION_ANIMATION_FILENAME = "explosion_bb.png";
+    const std::string P_EXPLOSION_ANIMATION_FILENAME = "explosion_p.png";
+    const std::string G_EXPLOSION_ANIMATION_FILENAME = "explosion_g.png";
+
+    #ifdef __linux__
+        const std::string ModelPath = "Resources/models/";
+        const std::string AnimationPath = "Resources/animations/";
+    #else
+        const std::string ModelPath = "Resources\models\\";
+        const std::string AnimationPath = "Resources\animations\\";
+    #endif
+
+}; // end of namespace graphic
+
+}; // end of namespace rbw
 
 #endif // WORLDCONSTANT_H

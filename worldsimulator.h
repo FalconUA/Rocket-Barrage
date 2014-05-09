@@ -101,6 +101,8 @@ typedef struct {
     std::vector< Object > wallForRocket;
     std::vector< rbw::spawnPos* > spawnPositions;
     std::vector< std::string > WorldEvents;
+
+    std::vector< rbw::GraphicObject > Explosions;
 } WorldInformation;
 
 class WorldObject
@@ -131,7 +133,7 @@ public:
            rbw::WorldInformation * worldInfo);
     std::string GetPlayerName();
 
-    void Move(rbw::Direction direction);
+    void Move(sf::Vector2i direction);
     void Respawn();
 
     bool isAlive();
@@ -236,7 +238,7 @@ public:
     bool AddHomingMissile(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddBouncingBomb(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddGrenade(std::string PlayerName, sf::Vector2i mousePosition);
-    bool AddMoveRequest(std::string PlayerName, rbw::Direction direction);    
+    bool AddMoveRequest(std::string PlayerName, sf::Vector2i direction);
     float SimulateNextStep(); // returns elapsed time since last world step
 
     std::vector< std::string > ExportEvents();

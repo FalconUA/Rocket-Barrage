@@ -1,5 +1,8 @@
 #include "graphicobject.h"
 
+namespace rbw
+{
+
 void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object){
     if (object->type == rbw::Graphic::PLAYER){
         sf::CircleShape circle;
@@ -124,3 +127,5 @@ void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object){
 
     }
 }
+
+}; // end of namespace rbw

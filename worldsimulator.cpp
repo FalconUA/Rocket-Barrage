@@ -51,14 +51,22 @@ std::string Player::GetPlayerName()
 {
     return this->PlayerName;
 }
-void Player::Move(rbw::Direction direction)
+void Player::Move(sf::Vector2i direction)
 {
     sf::Vector2f p_new = sf::Vector2f(0.0f, 0.0f);
+    /*
     if (direction == rbw::DIRECTION_NODIRECTION) return ;
+
     if (direction == rbw::DIRECTION_UP) p_new.y -= 1.0f;
     if (direction == rbw::DIRECTION_DOWN) p_new.y += 1.0f;
     if (direction == rbw::DIRECTION_LEFT) p_new.x -= 1.0f;
     if (direction == rbw::DIRECTION_RIGHT) p_new.x += 1.0f;
+    */
+
+    p_new.x = rbw::sgn(direction.x);
+    p_new.y = rbw::sgn(direction.y);
+
+    if (p_new == sf::Vector2f(0.f, 0.f)) return ;
 
     float mSpeedTimeFactor = 1000.0 / this->worldInfo->FPS;
 
@@ -73,11 +81,16 @@ void Player::Move(rbw::Direction direction)
     p_new.x *= velocity;
     p_new.y *= velocity;
 
-    bool can_move = true;
-    sf::Vector2f p0 = this->position;
-    float new_x = p0.x + p_new.x;
-    float new_y = p0.y + p_new.y;
+    this->speed = sf::Vector2f(p_new.x , p_new.y);
 
+    sf::Vector2f p0 = this->position;
+
+    float new_x;// = p0.x + p_new.x;
+    float new_y;// = p0.y + p_new.y;
+
+    bool can_move_hor = true;
+    new_x = p0.x + p_new.x;
+    new_y = p0.y;
     for (int i=0; i<this->worldInfo->wallForPlayer.size(); i++){
         bool temp;
 
@@ -87,9 +100,30 @@ void Player::Move(rbw::Direction direction)
         int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
 
         temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
-        can_move = can_move && temp;
+        can_move_hor = can_move_hor && temp;
     }
-    if (!can_move) return ;
+
+    bool can_move_ver = true;
+    new_x = p0.x;
+    new_y = p0.y + p_new.y;
+    for (int i=0; i<this->worldInfo->wallForPlayer.size(); i++){
+        bool temp;
+
+        int y1 = this->worldInfo->wallForPlayer[i].rect.top;
+        int x1 = this->worldInfo->wallForPlayer[i].rect.left;
+        int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
+        int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
+
+        temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+        can_move_ver = can_move_ver && temp;
+    }
+
+    if (!(can_move_hor || can_move_ver)) return ;
+
+    new_x = p0.x;
+    new_y = p0.y;
+    if (can_move_hor) new_x += p_new.x;
+    if (can_move_ver) new_y += p_new.y;
     this->SetPosition(sf::Vector2f(new_x, new_y));
 }
 bool Player::isAlive()
@@ -106,6 +140,14 @@ bool Player::Hit(int damage)
         this->health -= damage;
         if (this->health <= 0){
             this->alive = false;
+
+            rbw::GraphicObject newExplosion;
+            newExplosion.type = rbw::Graphic::PLAYER_EXPLOSION;
+            newExplosion.Name = this->PlayerName;
+            newExplosion.x = this->position.x;
+            newExplosion.y = this->position.y;
+            this->worldInfo->Explosions.push_back(newExplosion);
+
             this->position = sf::Vector2f(-10000.0f, -10000.0f);
             return true;
         }
@@ -146,7 +188,15 @@ HomingMissile::HomingMissile(Player *owner, Player *target, rbw::HM_ChainElement
 }
 rbw::HomingMissile::~HomingMissile()
 {
-    this->owner->HomingMissilesLeft++;
+    rbw::GraphicObject newExplosion;
+    newExplosion.type = rbw::Graphic::HOMINGMISSILE_EXPLOSION;
+    newExplosion.Name = this->owner->GetPlayerName();
+    newExplosion.x = this->position.x;
+    newExplosion.y = this->position.y;
+    this->worldInfo->Explosions.push_back(newExplosion);
+
+    if (rbw::GameParam::HOMING_MISSILE_RECHARGE_AFTER_EXPLOSING)
+        this->owner->HomingMissilesLeft++;
 }
 rbw::Player * HomingMissile::GetOwner()
 {
@@ -210,6 +260,7 @@ void HomingMissile::SimulateNextStep()
         }
         delete this->LocationInChain;
         this->haveToBeDestroyed = true; // will be destroyed in next step
+
         this->~HomingMissile();
         return ;
     }
@@ -230,7 +281,8 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
         vec_a.x = tmpPosition.x - this->position.x;
         vec_a.y = tmpPosition.y - this->position.y;
         float distance = vec_a.x * vec_a.x + vec_a.y * vec_a.y;
-        if (distance < 24*24.0f){
+        float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::HOMING_MISSILE_HITBOX_RADIUS;
+        if (distance < minDistance * minDistance){
             *victim = tmpPlayer;
             std::cout << "victim: " << (*victim)->GetPlayerName() << std::endl;
             return this->position;
@@ -271,7 +323,15 @@ BouncingBomb::BouncingBomb(Player *owner, rbw::BB_ChainElement * location, World
 }
 BouncingBomb::~BouncingBomb()
 {
-    this->owner->BouncingBombsLeft++;
+    rbw::GraphicObject newExplosion;
+    newExplosion.type = rbw::Graphic::BOUNCINGBOMB_EXPLOSION;
+    newExplosion.Name = this->owner->GetPlayerName();
+    newExplosion.x = this->position.x;
+    newExplosion.y = this->position.y;
+    this->worldInfo->Explosions.push_back(newExplosion);
+
+    if (rbw::GameParam::BOUNCING_BOMB_RECHARGE_AFTER_EXPLOSING)
+        this->owner->BouncingBombsLeft++;
 }
 rbw::Player * BouncingBomb::GetOwner()
 {
@@ -342,7 +402,8 @@ sf::Vector2f BouncingBomb::getCollisionWithPlayers(Player **victim)
         sf::Vector2f dv( tmpPlayer->GetPosition().x - this->position.x,
                          tmpPlayer->GetPosition().y - this->position.y );
         float distance = dv.x*dv.x + dv.y*dv.y;
-        if (distance < 24*24.0f){
+        float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::BOUNCING_BOMB_HITBOX_RADIUS;
+        if (distance < minDistance*minDistance){
             *victim = tmpPlayer;
             return this->position;
         }
@@ -447,7 +508,24 @@ Grenade::Grenade(Player *owner, G_ChainElement *location, WorldInformation *worl
 }
 Grenade::~Grenade()
 {
-    this->owner->GrenadesLeft++;
+    rbw::GraphicObject newExplosion;
+    newExplosion.type = rbw::Graphic::GRENADE_EXPLOSION;
+    newExplosion.Name = this->owner->GetPlayerName();
+
+    int angle;
+    float rad_angle;
+
+    for (int k = 0; k < 8; k++){
+
+        angle = k * 380.0f/8.0f;
+        rad_angle = angle * 1.0f /180 * M_PI;
+        newExplosion.x = this->position.x + cos(rad_angle) * rbw::GameParam::GRENADE_RADIUS_OF_EFFECT;
+        newExplosion.y = this->position.y + sin(rad_angle) * rbw::GameParam::GRENADE_RADIUS_OF_EFFECT;
+        this->worldInfo->Explosions.push_back(newExplosion);
+    }
+
+    if (rbw::GameParam::GRENADE_RECHARGE_AFTER_EXPLOSING)
+        this->owner->GrenadesLeft++;
 }
 
 bool Grenade::HaveToBeDestroyed()
@@ -745,7 +823,7 @@ bool WorldSimulator::AddGrenade(std::string PlayerName, sf::Vector2i mousePositi
     return true;
 }
 
-bool WorldSimulator::AddMoveRequest(std::string PlayerName, Direction direction)
+bool WorldSimulator::AddMoveRequest(std::string PlayerName, sf::Vector2i direction)
 {
     rbw::Player * currPlayer = NULL;
     for (int i=0; i<this->worldInfo.Players.size(); i++){
@@ -805,6 +883,9 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
         newobject.type = rbw::Graphic::PLAYER;
         newobject.x = (int) p0.x;
         newobject.y = (int) p0.y;
+        newobject.velocity_x = tmp->GetSpeed().x;
+        newobject.velocity_y = tmp->GetSpeed().y;
+
         objects->push_back(newobject);
     }
     rbw::HM_ChainElement * HM_currElement = this->worldInfo.homingMissiles.FirstInChain;
@@ -818,6 +899,8 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
         newobject.type = rbw::Graphic::FOLLOW_ROCKET;
         newobject.x = (int) p0.x;
         newobject.y = (int) p0.y;
+        newobject.velocity_x = rocket->GetSpeed().x;
+        newobject.velocity_y = rocket->GetSpeed().y;
         objects->push_back(newobject);
     }
     rbw::BB_ChainElement * BB_currElement = this->worldInfo.bouncingBombs.FirstInChain;
@@ -831,6 +914,8 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
         newobject.type = rbw::Graphic::BOUNCE_ROCKET;
         newobject.x = (int) p0.x;
         newobject.y = (int) p0.y;
+        newobject.velocity_x = rocket->GetSpeed().x;
+        newobject.velocity_y = rocket->GetSpeed().y;
         objects->push_back(newobject);
     }
     rbw::G_ChainElement * G_currElement = this->worldInfo.Grenades.FirstInChain;
@@ -845,9 +930,16 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
         newobject.type = rbw::Graphic::GRENADE;
         newobject.x = (int) p0.x;
         newobject.y = (int) p0.y;
+        newobject.velocity_x = rocket->GetSpeed().x;
+        newobject.velocity_y = rocket->GetSpeed().y;
         objects->push_back(newobject);
     }
 
+    for (int i=0; i<this->worldInfo.Explosions.size(); i++){
+        objects->push_back(this->worldInfo.Explosions[i]);
+    }
+    this->worldInfo.Explosions.clear();
+    return true;
 }
 std::vector< rbw::PlayerExportInformation > WorldSimulator::ExportPlayerInfo()
 {
