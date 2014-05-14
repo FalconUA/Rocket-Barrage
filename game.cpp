@@ -28,6 +28,7 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
 
     this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK);
     this->server->AddPlayer("Bot", rbw::TEAM_WHITE);
+    this->server->AddPlayer("Bot2", rbw::TEAM_WHITE);
     return true;
 }
 

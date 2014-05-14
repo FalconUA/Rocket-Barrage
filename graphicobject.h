@@ -22,7 +22,7 @@ typedef struct {
     int HealthPoint;
 
     // only for "Grenade" type:
-    float zoom_coefficient = 1.0;
+    float zoom_coefficient;
 
 } GraphicObject;
 

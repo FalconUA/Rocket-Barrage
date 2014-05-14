@@ -117,8 +117,15 @@ void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object){
         window->draw(right_hor);
 
         sf::CircleShape circle;
-        circle.setFillColor(sf::Color::Transparent);
-        circle.setOutlineThickness(2.0f);
+        //circle.setFillColor(sf::Color::Transparent);
+        sf::Color color;
+        color.g = 0;
+        color.r = 0;
+        color.b = 255;
+        color.a = 50;
+
+        circle.setFillColor(color);
+        circle.setOutlineThickness(1.0f);
         circle.setOutlineColor(sf::Color::Cyan);
         circle.setRadius(rbw::GameParam::GRENADE_RADIUS_OF_EFFECT - 16.0f);
         circle.setPosition(sf::Vector2f(object->x - rbw::GameParam::GRENADE_RADIUS_OF_EFFECT + 16.0f,

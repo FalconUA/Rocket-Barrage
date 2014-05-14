@@ -17,9 +17,9 @@ namespace GameParam
     const int GRENADE_DAMAGE = 10;
 
     const int MAX_BOUNCE_NUMBER = 6;
-    const float MAX_PLAYER_SPEED = 0.36f; // speed per milisecond, is equal to 8 pixels per 60ms
-    const float MAX_HOMING_MISSILE_SPEED = 0.64f; // speed per milisecond, is equal to 12 pixels per 60ms
-    const float MAX_BOUNCING_BOMB_SPEED = 0.64f; // speed per milisecond, is equal to 12 pixels per 60ms
+    const float MAX_PLAYER_SPEED = 0.36f; // speed per milisecond, 0.36f is equal to 8 pixels per 60ms
+    const float MAX_HOMING_MISSILE_SPEED = 0.50f; // speed per milisecond, 0.64f is equal to 12 pixels per 60ms
+    const float MAX_BOUNCING_BOMB_SPEED = 0.50f; // speed per milisecond, 0.64f is equal to 12 pixels per 60ms
 
     const int GRENADE_TIME_TO_LIVE = 1000; // in miliseconds;
     const float GRENADE_HEIGHT = 200; // in pixels
@@ -57,7 +57,8 @@ typedef enum {
 
 typedef enum {
     TEAM_BLACK,
-    TEAM_WHITE
+    TEAM_WHITE,
+    TEAM_NOTEAM
 } Team;
 
 namespace Graphic{

@@ -245,7 +245,7 @@ public:
     std::vector< rbw::PlayerExportInformation > ExportPlayerInfo();
     bool GetObjects(std::vector< GraphicObject >* objects);
 
-    bool RoundEnded();
+    bool RoundEnded(rbw::Team * WinningTeam);
     bool RoundDraw();
 private:    
     rbw::WorldInformation worldInfo;    

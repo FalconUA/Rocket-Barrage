@@ -512,15 +512,14 @@ Grenade::~Grenade()
     newExplosion.type = rbw::Graphic::GRENADE_EXPLOSION;
     newExplosion.Name = this->owner->GetPlayerName();
 
-    int angle;
+    float angle;
     float rad_angle;
 
-    for (int k = 0; k < 8; k++){
-
-        angle = k * 380.0f/8.0f;
-        rad_angle = angle * 1.0f /180 * M_PI;
-        newExplosion.x = this->position.x + cos(rad_angle) * rbw::GameParam::GRENADE_RADIUS_OF_EFFECT;
-        newExplosion.y = this->position.y + sin(rad_angle) * rbw::GameParam::GRENADE_RADIUS_OF_EFFECT;
+    for (int k = 0; k < 10; k++){
+        angle = k * 360.0f/10.0f;
+        rad_angle = (angle * 1.0f /180) * M_PI;
+        newExplosion.x = this->position.x + cos(rad_angle) * (rbw::GameParam::GRENADE_RADIUS_OF_EFFECT-5);
+        newExplosion.y = this->position.y + sin(rad_angle) * (rbw::GameParam::GRENADE_RADIUS_OF_EFFECT-5);
         this->worldInfo->Explosions.push_back(newExplosion);
     }
 
@@ -752,6 +751,22 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
         a = mousePosition.x - p0.x;
         b = mousePosition.y - p0.y;
         double newdistance = a*a + b*b;
+/*
+        bool is_visible = true;
+
+        for (int i=0; i<this->worldInfo.wallForRocket.size(); i++){
+            sf::Rect< int > tmp = this->worldInfo.wallForRocket[i].rect;
+            //has collision with i-th rectangle
+            rbw::intPolygon tmpPolygon(tmp);
+
+            sf::Vector2f pInt = tmpPolygon.CheckIntersect(owner->GetPosition(), tmpPlayer->GetPosition());
+            if (pInt != sf::Vector2f(-1.0f, -1.0f)){
+                is_visible = false;
+                break;
+            }
+        }
+        if (!is_visible) continue;
+*/
 
         //if that bastard is closer
         if (newdistance < distance){
@@ -763,6 +778,21 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
         std::cout << "no victim found";
         return false;
     }
+
+    /*
+    // Check if owner can see his victim
+    for (int i=0; i<this->worldInfo->wallForRocket.size(); i++){
+        sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
+        //has collision with i-th rectangle
+        rbw::intPolygon tmpPolygon(tmp);
+
+        pAns = tmpPolygon.CheckIntersect(this->position,
+                                         sf::Vector2f(this->position.x + this->speed.x, this->position.y + this->speed.y));
+        if (pAns != sf::Vector2f(-1.0f, -1.0f))
+            return pAns;
+    }
+    */
+
     std::cout << PlayerName << " has sent a gift to " << target->GetPlayerName() << std::endl;
 
     rbw::HM_ChainElement * newElement = new rbw::HM_ChainElement;
@@ -968,7 +998,7 @@ std::vector< std::string > WorldSimulator::ExportEvents()
     this->worldInfo.WorldEvents.clear();
     return answer;
 }
-bool WorldSimulator::RoundEnded()
+bool WorldSimulator::RoundEnded(rbw::Team * WinningTeam)
 {
     bool allBlackAreDead = true;
     for (int i=0; i<this->worldInfo.Players.size(); i++){
@@ -982,6 +1012,10 @@ bool WorldSimulator::RoundEnded()
         if (tmpPlayer->GetTeam() == rbw::TEAM_WHITE)
             allWhiteAreDead = (allWhiteAreDead && (tmpPlayer->isAlive() == false));
     }
+    if (allBlackAreDead && allWhiteAreDead) *WinningTeam = rbw::TEAM_NOTEAM;
+    else if (allBlackAreDead) *WinningTeam = rbw::TEAM_WHITE;
+    else if (allWhiteAreDead) *WinningTeam = rbw::TEAM_BLACK;
+
     return (allBlackAreDead || allWhiteAreDead);
 }
 
@@ -1057,8 +1091,7 @@ WorldSimulator::~WorldSimulator()
     for (int i=0; i<this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
         delete tmpPlayer;
-    }
-
+    }    
 }
 
 }; // end of namespace rbw
