@@ -1,4 +1,7 @@
 #include "graphicengine.h"
+#include <sstream>
+#include <string>
+#include <stdlib.h>
 
 namespace rbw
 {
@@ -7,6 +10,8 @@ GraphicEngine::GraphicEngine()
 {
     this->Explosions.First = NULL;
     this->Explosions.Last = NULL;
+
+    this->UbuntuMono.loadFromFile("Resources/UbuntuMono-R.ttf");
 }
 
 bool ImportModelData(rbw::Graphic::modelData * model, const std::string fileName, float hitboxRadius)
@@ -59,7 +64,17 @@ bool ImportAnimationData(rbw::Graphic::AnimationData * animation, const std::str
 bool GraphicEngine::initOutputWindow(sf::RenderWindow *window)
 {
     this->outputWindow = window;
-    return (window != NULL);
+    if (window == NULL) return false;
+
+    if (!this->deskTexture.loadFromFile("Resources/Texture.jpg")){
+        std::cout << "Failed to load desk sheet." << std::endl;
+    }
+
+    this->deskSprite.setTexture(this->deskTexture);
+    this->deskSprite.setPosition(window->getSize().x - 200, 0);
+
+
+    return true;
 }
 
 bool GraphicEngine::initModels()
@@ -120,6 +135,18 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             health.setSize(sf::Vector2f(40.0f * (tmpObj->HealthPoint/100.0f), 3.0f));
             health.setPosition(tmpObj->x - 20, tmpObj->y - 24);
 
+            sf::Text text;
+            text.setFont(this->UbuntuMono);
+            text.setCharacterSize(12);
+            text.setStyle(sf::Text::Bold);
+
+            text.setString(tmpObj->Name);
+            text.setColor(sf::Color::Black);
+            text.setPosition(sf::Vector2f(tmpObj->x - 25, tmpObj->y-40));
+
+
+            this->outputWindow->draw(text);
+
             this->outputWindow->draw(data->sprite);
             this->outputWindow->draw(hpBar);
             this->outputWindow->draw(health);
@@ -146,6 +173,19 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             health.setFillColor(sf::Color::Yellow);
             health.setSize(sf::Vector2f(40.0f * (tmpObj->HealthPoint/100.0f), 3.0f));
             health.setPosition(tmpObj->x - 20, tmpObj->y - 24);
+
+            sf::Text text;
+            text.setFont(this->UbuntuMono);
+            text.setCharacterSize(12);
+            text.setStyle(sf::Text::Bold);
+
+            text.setString(tmpObj->Name);
+            text.setColor(sf::Color::Black);
+            text.setPosition(sf::Vector2f(tmpObj->x - (text.getLocalBounds().width/2), tmpObj->y-30-text.getLocalBounds().height));
+
+
+            this->outputWindow->draw(text);
+
 
             this->outputWindow->draw(data->sprite);
             this->outputWindow->draw(hpBar);
@@ -340,6 +380,111 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             delete currElement;
         }
     }
+
+    this->outputWindow->draw(this->deskSprite);
+}
+
+bool GraphicEngine::ShowEventList(std::vector<std::string> eventVector)
+{
+    for (int i=0; i<eventVector.size(); i++){
+        this->eventList.push_back(eventVector[i]);
+        if (this->eventList.size() > 35){
+            this->eventList.erase(eventList.begin());
+        }
+    }
+    std::string outputStr;
+    for (int i=0; i<this->eventList.size(); i++)
+        outputStr += this->eventList[i]+"\n";
+
+    sf::Text tableText;
+    tableText.setFont(this->UbuntuMono);
+    tableText.setPosition(sf::Vector2f(this->outputWindow->getSize().x - 195, 100));
+    tableText.setString(outputStr);
+    tableText.setCharacterSize(14);
+    tableText.setColor(sf::Color::Yellow);
+
+    this->outputWindow->draw(tableText);
+}
+
+bool GraphicEngine::ShowScoreTable(std::vector< rbw::PlayerExportInformation > peiVector)
+{
+    sf::Color bgcolor;
+    bgcolor.g = 0;
+    bgcolor.r = 0;
+    bgcolor.b = 0;
+    bgcolor.a = 162;
+
+    sf::RectangleShape background;
+    background.setPosition(40.0f, 40.0f);
+    background.setSize(sf::Vector2f(430, 330));
+    background.setFillColor(bgcolor);
+    background.setOutlineThickness(3);
+    background.setOutlineColor(sf::Color::Black);
+
+    //std::sort(peiVector.begin(), peiVector.end());
+
+    std::string tableStr;
+    tableStr += " Team Black:                                              \n";
+    tableStr += "|--------------------------|------|-------|--------------|\n";
+    tableStr += "|Nickname                  | Kill | Death | Damage dealt |\n";
+    tableStr += "|--------------------------|------|-------|--------------|\n";
+
+    //            12345678901234567890123456 123456 1234567 12345678901234
+    //              26                          6     7        14
+
+    for (int i=0; i<peiVector.size(); i++){
+        rbw::PlayerExportInformation tmpInfo = peiVector[i];
+        if (tmpInfo.team != rbw::TEAM_BLACK) continue;
+        std::string nickName = tmpInfo.PlayerName;
+        std::string kill = std::to_string(tmpInfo.Kill);
+        std::string death = std::to_string(tmpInfo.Death);
+        std::string damageDealt = std::to_string(tmpInfo.DamageDealt);
+
+        nickName.resize(26,' ');
+        kill.resize(6,' ');
+        death.resize(7,' ');
+        damageDealt.resize(14,' ');
+
+        std::string newLine("|" + nickName + "|" + kill + "|" + death + "|" + damageDealt + "|\n");
+        tableStr += newLine;
+    }
+    tableStr += "|--------------------------|------|-------|--------------|\n";
+    tableStr += "                                                          \n";
+    tableStr += " Team White:                                              \n";
+    tableStr += "|--------------------------|------|-------|--------------|\n";
+    tableStr += "|Nickname                  | Kill | Death | Damage dealt |\n";
+    tableStr += "|--------------------------|------|-------|--------------|\n";
+
+    for (int i=0; i<peiVector.size(); i++){
+        rbw::PlayerExportInformation tmpInfo = peiVector[i];
+        if (tmpInfo.team != rbw::TEAM_WHITE) continue;
+        std::string nickName = tmpInfo.PlayerName;
+        std::string kill = std::to_string(tmpInfo.Kill);
+        std::string death = std::to_string(tmpInfo.Death);
+        std::string damageDealt = std::to_string(tmpInfo.DamageDealt);
+
+        nickName.resize(26,' ');
+        kill.resize(6,' ');
+        death.resize(7,' ');
+        damageDealt.resize(14,' ');
+
+        std::string newLine("|" + nickName + "|" + kill + "|" + death + "|" + damageDealt + "|\n");
+        tableStr += newLine;
+    }
+    tableStr += "|--------------------------|------|-------|--------------|\n";
+
+    sf::Text tableText;
+    tableText.setFont(this->UbuntuMono);
+    tableText.setPosition(sf::Vector2f(background.getPosition().x+6, background.getPosition().y+2));
+    tableText.setString(tableStr);
+    tableText.setCharacterSize(14);
+    tableText.setColor(sf::Color::Yellow);
+
+    background.setSize(sf::Vector2f(tableText.getLocalBounds().width+12, tableText.getLocalBounds().height+5));
+
+    this->outputWindow->draw(background);
+    this->outputWindow->draw(tableText);
+
 }
 
 }; // end of namespace rbw

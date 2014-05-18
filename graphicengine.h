@@ -49,6 +49,11 @@ typedef struct __AnimationChain
     AnimationChainElement * Last = NULL;
 } AnimationChain;
 
+typedef struct
+{
+    rbw::Graphic::modelData background;
+
+} Widgets;
 
 }; // end of namespace Graphic
 class GraphicEngine
@@ -58,7 +63,9 @@ public:
     bool initModels();
     bool initAnimations();
     bool initOutputWindow(sf::RenderWindow * window);
-    bool Render(std::vector< rbw::GraphicObject > graphicObjects);
+    bool Render(std::vector< rbw::GraphicObject > graphicObjects);    
+    bool ShowScoreTable(std::vector< rbw::PlayerExportInformation > peiVector);
+    bool ShowEventList(std::vector< std::string > eventVector);
     ~GraphicEngine();
 private:
     sf::RenderWindow * outputWindow;
@@ -77,10 +84,15 @@ private:
     rbw::Graphic::AnimationData P_ExplosionData;
     rbw::Graphic::AnimationData G_ExplosionData;
 
-    rbw::Graphic::AnimationChain Explosions;
+    rbw::Graphic::AnimationChain Explosions;       
 
     int count = 0;
 
+    sf::Font UbuntuMono;
+
+    sf::Texture deskTexture;
+    sf::Sprite deskSprite;
+    std::vector< std::string > eventList;
 };
 
 };

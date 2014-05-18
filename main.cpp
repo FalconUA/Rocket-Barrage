@@ -19,7 +19,7 @@ int main(int argc, char * argv[]){
     int h = level.GetHeight();
     int w = level.GetWidth();
 
-    sf::RenderWindow window(sf::VideoMode(w + 150, h), "Battle Tanks vodka edition");   
+    sf::RenderWindow window(sf::VideoMode(w + 200, h), "Battle Tanks vodka edition");
     //window.setMouseCursorVisible(false);
 
     window.setVerticalSyncEnabled(true); // call it once, after creating the window

@@ -8,6 +8,7 @@
 #include <worldsimulator.h>
 #include <SFML/System.hpp>
 #include <graphicengine.h>
+#include <movetothevictim.h>
 
 using namespace rbw;
 
@@ -33,6 +34,10 @@ private:
     std::vector< GraphicObject > Objects;
     Level  * level;
     bool Switch_mouse;
+    bool ShowScore;
+
+    std::vector<TRectangle> getWalls(); //it's new
+    MoveToTheVictim * moveToTheVictim;  //it's new
 };
 
 #endif // GAME_H

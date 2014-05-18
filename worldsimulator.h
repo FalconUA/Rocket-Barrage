@@ -72,6 +72,7 @@ typedef struct {
 typedef struct
 {
     std::string PlayerName;
+    rbw::Team team;
     int Kill;
     int Death;
     int DamageDealt;
@@ -114,6 +115,7 @@ public:
     sf::Vector2f GetPosition();
     rbw::ObjectType GetType();
     sf::Vector2f GetSpeed();    
+    rbw::WorldInformation * const getWorldInfo();
 
 protected:
     sf::Vector2f position;
@@ -130,7 +132,8 @@ public:
     Player(std::string PlayerName,
            rbw::Team team,
            rbw::spawnPos * spawnPosition,
-           rbw::WorldInformation * worldInfo);
+           rbw::WorldInformation * worldInfo,
+           bool bot);   //it's new
     std::string GetPlayerName();
 
     void Move(sf::Vector2i direction);
@@ -140,6 +143,9 @@ public:
     rbw::Team GetTeam();
     int GetHealth();
     bool Hit(int damage); // the true result means that this player was killed right after calling this function
+    bool bot(); //true if bot; false if real player;
+                //it's new
+
 
     int Kill;
     int Death;    
@@ -156,6 +162,8 @@ private:
     int health;
     bool alive;
 
+    bool BOT;   //true if bot; false if real player;
+                //it's new
     rbw::spawnPos * spawnPosition;
 };
 
@@ -234,7 +242,7 @@ public:
 /* External functions:
  * these functions will be used by server!
  */
-    bool AddPlayer(std::string PlayerName, rbw::Team team); // the false return means that current map is not designed for more players
+    bool AddPlayer(std::string PlayerName, rbw::Team team, bool isBot); // the false return means that current map is not designed for more players
     bool AddHomingMissile(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddBouncingBomb(std::string PlayerName, sf::Vector2i mousePosition);
     bool AddGrenade(std::string PlayerName, sf::Vector2i mousePosition);
@@ -247,6 +255,7 @@ public:
 
     bool RoundEnded(rbw::Team * WinningTeam);
     bool RoundDraw();
+    rbw::WorldInformation * const getWorldInfo();
 private:    
     rbw::WorldInformation worldInfo;    
 };

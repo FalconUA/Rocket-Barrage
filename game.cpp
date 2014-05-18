@@ -6,6 +6,7 @@ using namespace rbw;
 
 Game::Game(std::string PlayerName){
     this->MyName = PlayerName;    
+    moveToTheVictim = new MoveToTheVictim;  //it's new
 }
 
 Game::Game(WorldSimulator * server, std::string PlayerName, sf::RenderWindow *window, Level * level){
@@ -15,6 +16,7 @@ Game::Game(WorldSimulator * server, std::string PlayerName, sf::RenderWindow *wi
 
 bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level){
     this->Switch_mouse = false;
+    this->ShowScore = false;
     this->mouse_object.type = rbw::Graphic::MOUSE_POINTER_NORMAL;
     window->setMouseCursorVisible(false);
     this->level = level;
@@ -26,11 +28,34 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
     this->graphic->initModels();
     this->graphic->initAnimations();
 
-    this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK);
-    this->server->AddPlayer("Bot", rbw::TEAM_WHITE);
-    this->server->AddPlayer("Bot2", rbw::TEAM_WHITE);
+    moveToTheVictim->walls = this->getWalls();// ------------it's new //
+
+    this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK,false);
+    this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,true);
+    this->server->AddPlayer("Bot1", rbw::TEAM_WHITE,true);
     return true;
 }
+
+//---------------------------------------it's new-----------------------------------//
+std::vector<TRectangle> Game::getWalls()
+{
+    std::vector< Object > walls = this->server->getWorldInfo()->wallForPlayer;
+    Object wall;
+    std::vector<TRectangle> my_walls;
+    TRectangle my_wall;
+    for(int i = 0; i < (int)walls.size(); i++)
+    {
+        wall = walls[i];
+        my_wall.A.x = wall.rect.left;
+        my_wall.A.y = wall.rect.top;
+        my_wall.B.x = my_wall.A.x + wall.rect.width;
+        my_wall.B.y = my_wall.A.y + wall.rect.height;
+        my_walls.push_back(my_wall);
+    }
+    return my_walls;
+}
+//----------------------------------------------------------------------------------//
+
 
 void Game::CheckKey(){
 
@@ -42,6 +67,7 @@ void Game::CheckKey(){
     sf::Vector2i direction_bot(0,0);
 
     sf::Keyboard key;    
+    this->ShowScore = (key.isKeyPressed(sf::Keyboard::Tab));
     if (key.isKeyPressed(sf::Keyboard::A)) direction_player.x--;//this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_LEFT);
     if (key.isKeyPressed(sf::Keyboard::D)) direction_player.x++;//this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_RIGHT);
     if (key.isKeyPressed(sf::Keyboard::W)) direction_player.y--;//this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_UP);
@@ -98,6 +124,43 @@ void Game::RespondToEvent(sf::Event *event){
 
 void Game::GenerateNextFrame(){
 
+    //-----------------------------------it's new------------------------------------//
+    sf::Vector2i direction_bot(0,0);
+    Player * bot;
+    TPlayer _bot;
+    sf::Vector2f tmp;
+
+    for(int i = 0; i < (int)this->server->getWorldInfo()->Players.size(); i++)
+    {
+        bot = this->server->getWorldInfo()->Players[i];
+        tmp = bot->GetPosition();
+        _bot.coord.x = int(tmp.x);
+        _bot.coord.y = int(tmp.y);
+        _bot.speed = 1;
+        _bot.name = bot->GetPlayerName();
+        if(this->server->getWorldInfo()->Players[i]->bot())
+            moveToTheVictim->bots.push_back(_bot);
+                else
+            moveToTheVictim->victims.push_back(_bot);
+    }
+
+    std::vector< rbw::Player* > _bots;
+    for(int i = 0; i < (int)this->server->getWorldInfo()->Players.size(); i++)
+        if(this->server->getWorldInfo()->Players[i]->bot())
+            _bots.push_back(this->server->getWorldInfo()->Players[i]);
+
+    TVector victim_position;
+    for(int i = 0; i < (int)moveToTheVictim->bots.size(); i++){
+        if(moveToTheVictim->moveToTheVictim(moveToTheVictim->bots[i],_bots[i],&victim_position,&direction_bot))
+            this->server->AddBouncingBomb(moveToTheVictim->bots[i].name,sf::Vector2i(victim_position.x,victim_position.y));
+        this->server->AddMoveRequest(moveToTheVictim->bots[i].name, direction_bot);
+    }
+    moveToTheVictim->bots.clear();
+    moveToTheVictim->victims.clear();
+    //-----------------------------------------------------------------//
+
+
+
     float ElapsedTime = server->SimulateNextStep();    
 
     this->server->GetObjects(&this->Objects);    
@@ -117,6 +180,10 @@ void Game::GenerateNextFrame(){
     */
 
     rbw::DrawGraphicObject(this->window, &this->mouse_object);
+    if (this->ShowScore){
+        this->graphic->ShowScoreTable(this->server->ExportPlayerInfo());
+    }
+    this->graphic->ShowEventList(this->server->ExportEvents());
 
     float fps = 1000.f / ElapsedTime;
     int FPS = fps;
@@ -129,16 +196,17 @@ void Game::GenerateNextFrame(){
     font.loadFromFile("Resources/UbuntuMono-R.ttf");
     sf::Text text;
     text.setFont(font);
-    text.setString(s);
+    text.setString("FPS: " + s);
     text.setColor(sf::Color::White);
 
     sf::Vector2u winSize = this->window->getSize();
-    text.setPosition(sf::Vector2f( winSize.x - 100, 25 ));
+    text.setPosition(sf::Vector2f( winSize.x - 125, 25 ));
 
 
     this->window->draw(text);    
 
-    if (server->RoundEnded())
+    rbw::Team winningTeam;
+    if (server->RoundEnded(&winningTeam))
         server->RoundDraw();
 
 }

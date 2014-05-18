@@ -2,6 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += c++11
 
 SOURCES += main.cpp \
     level.cpp \
@@ -14,7 +15,9 @@ SOURCES += main.cpp \
     graphicobject.cpp \
     worldsimulator.cpp \
     worldphysic.cpp \
-    graphicengine.cpp
+    graphicengine.cpp \
+    evadefromtherocket.cpp \
+    movetothevictim.cpp
 
 INCLUDEPATH += Tiled/
 
@@ -35,6 +38,8 @@ HEADERS += \
     worldphysic.h \
     worldconstant.h \
     graphicengine.h \
-    rbwincludes.h
+    rbwincludes.h \
+    evadefromtherocket.h \
+    movetothevictim.h
 
 OTHER_FILES +=
