@@ -9,6 +9,7 @@
 InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-1),IndexOfGame(Index),
     TimeStep(0.5*1000),QThread(0),qre("(G|(?:BB)|(?:HM)|(?:AMR)):([0-9]+) ([0-9]+)")//,timer(this)([0-9]+) (0-9+)
 {
+
     for(int i=0;i<=N-1;i++)
     {
         UserInfo[i]=NULL;

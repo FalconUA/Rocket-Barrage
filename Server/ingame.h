@@ -1,5 +1,6 @@
 #ifndef INGAME_H
 #define INGAME_H
+
 #include <QWidget>
 #include <QDebug>
 #include "server.h"
@@ -37,10 +38,10 @@ private:
 
     QRegExp qre;
     int maxIndex;
-    int Round=0;
+    int Round = 0;
     const unsigned int IndexOfGame;
     const unsigned int TimeStep; 
-    bool Timeout=0;
+    bool Timeout = 0;
 public:
     InGame(QObject*,int Index);
     ~InGame();
@@ -70,7 +71,7 @@ public:
     QTcpSocket* qtcpSocket;
     const QString UserName;
     const int IndexOfClient;
-    bool IsSurrender=0;
+    bool IsSurrender;
 };
 //===========QSendToClientEvent============================
 class QSendToClientEvent:public QEvent
