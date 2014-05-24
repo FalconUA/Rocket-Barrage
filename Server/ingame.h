@@ -18,6 +18,17 @@ class QSendToClientEvent;
 //class SendToClient;
 
 
+typedef struct {
+    float FPS;
+    Level level;
+
+    rbw::WorldSimulator * world;
+
+    MoveToTheVictim * moveToTheVictim;  //it's new
+    int botcount;
+
+} RenderInformation;
+
 const int N=20;
 const double L=4;
 
@@ -32,9 +43,8 @@ private:
     void ReadyRead(int UserIndex, QString);
     QObject* server;
 
-    Level level;
-    rbw::WorldSimulator World;    
-    MoveToTheVictim * moveToTheVictim;  //it's new
+    RenderInformation renderInfo;
+    std::vector<TRectangle> getWalls();
 
     QRegExp qre;
     int maxIndex;

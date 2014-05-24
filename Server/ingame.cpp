@@ -2,6 +2,8 @@
 #include "QApplication"
 #include <sstream>
 #include <stdlib.h>
+#include <string>
+#include <stdio.h>
 #include <movetothevictim.h>
 #include <evadefromtherocket.h>
 
@@ -15,12 +17,30 @@ InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-
         UserInfo[i]=NULL;
     }
 
-    level.LoadFromFile("Resources/maps/test_new.tmx");
-    World.Init(&level,float(60));
+    this->renderInfo.FPS = 60.0f;
+    this->renderInfo.level.LoadFromFile("Resources/maps/test_new.tmx");
 
-    this->moveToTheVictim = new MoveToTheVictim;  //it's new
+    this->renderInfo.world = new rbw::WorldSimulator;
+    this->renderInfo.world->Init(&(this->renderInfo.level), this->renderInfo.FPS);
 
-    std::vector< Object > walls = this->World.worldInfo.wallForPlayer;
+    this->renderInfo.moveToTheVictim = new MoveToTheVictim;
+    this->renderInfo.botcount = 0;
+
+    this->renderInfo.moveToTheVictim->walls = this->getWalls();
+}
+InGame::~InGame()
+{
+    for(int i=0;i<=maxIndex;i++)
+    {
+        if(UserInfo[i]!=NULL)
+        {
+            delete UserInfo[i];
+        }
+    }
+}
+std::vector<TRectangle> InGame::getWalls()
+{
+    std::vector< Object > walls = this->renderInfo.world->getWorldInfo()->wallForPlayer;
     Object wall;
     std::vector<TRectangle> my_walls;
     TRectangle my_wall;
@@ -33,19 +53,10 @@ InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-
         my_wall.B.y = my_wall.A.y + wall.rect.height;
         my_walls.push_back(my_wall);
     }
-    this->moveToTheVictim->walls = my_walls;
+    return my_walls;
+}
 
-}
-InGame::~InGame()
-{
-    for(int i=0;i<=maxIndex;i++)
-    {
-        if(UserInfo[i]!=NULL)
-        {
-            delete UserInfo[i];
-        }
-    }
-}
+
 void InGame::run()
 {
     QString Text="";
@@ -55,8 +66,9 @@ void InGame::run()
         Text+=UserInfo[i]->UserName+" ";
     }
     sendToClient(Text);
+
     MoveThisWorld();
-    World.RoundDraw();    
+    this->renderInfo.world->RoundDraw();
     msleep(TimeStep);
     while(!Timeout)
     {
@@ -73,22 +85,22 @@ void InGame::addUser(QTcpSocket* Socket,QString UserName,int Index,int Team)
     {
         if(maxIndex%2==0)
         {
-            World.AddPlayer(UserName.toStdString(),rbw::TEAM_BLACK, false);
+            this->renderInfo.world->AddPlayer(UserName.toStdString(),rbw::TEAM_BLACK, false);
         }
         else
         {
-            World.AddPlayer(UserName.toStdString(),rbw::TEAM_WHITE, false);
+            this->renderInfo.world->AddPlayer(UserName.toStdString(),rbw::TEAM_WHITE, false);
         }
     }
     else
     {
         if(Team==1)
         {
-            World.AddPlayer(UserName.toStdString(),rbw::TEAM_BLACK, false);
+            this->renderInfo.world->AddPlayer(UserName.toStdString(),rbw::TEAM_BLACK, false);
         }
         else
         {
-            World.AddPlayer(UserName.toStdString(),rbw::TEAM_WHITE, false);
+            this->renderInfo.world->AddPlayer(UserName.toStdString(),rbw::TEAM_WHITE, false);
         }
     }
 }
@@ -97,10 +109,10 @@ void InGame::addBot(int numberOfBotWhiteTeam,int numberOfBotBlackTeam)
     qDebug()<<"Number of bot for White Team:"<<numberOfBotWhiteTeam
           <<". Number of bot for Black Team:"<<numberOfBotBlackTeam<<".";
     for (int i=0; i<numberOfBotWhiteTeam; i++){
-        World.AddPlayer(std::string("Bot")+std::to_string(i),rbw::TEAM_WHITE, true);
+        this->renderInfo.world->AddPlayer(std::string("Bot")+std::to_string(i),rbw::TEAM_WHITE, true);
     }
     for (int i=0; i<numberOfBotBlackTeam; i++){
-        World.AddPlayer(std::string("Bot")+std::to_string(i),rbw::TEAM_BLACK, true);
+        this->renderInfo.world->AddPlayer(std::string("Bot")+std::to_string(i),rbw::TEAM_BLACK, true);
     }
 }
 
@@ -121,48 +133,51 @@ QTcpSocket* InGame::TakeSocket(int Index)
 
 //====================Move=this=world========================================
 float InGame::MoveThisWorld()//QTimerEvent* event,TimerEvent,MoveThisWorld ((^.^)>)>)>)>>
-{
-    float ElapsedTime = World.SimulateNextStep();
-
+{    
     //-----------------------------------it's new------------------------------------//
     sf::Vector2i direction_bot(0,0);
     Player * bot;
     TPlayer _bot;
     sf::Vector2f tmp;
 
-    for(int i = 0; i < (int)World.worldInfo.Players.size(); i++)
+    for(int i = 0; i < (int)this->renderInfo.world->getWorldInfo()->Players.size(); i++)
     {
-        bot = World.worldInfo.Players[i];
+        bot = this->renderInfo.world->getWorldInfo()->Players[i];
         tmp = bot->GetPosition();
         _bot.coord.x = int(tmp.x);
         _bot.coord.y = int(tmp.y);
         _bot.speed = 1;
         _bot.name = bot->GetPlayerName();
-        if(World.worldInfo.Players[i]->bot())
-            moveToTheVictim->bots.push_back(_bot);
+        if(this->renderInfo.world->getWorldInfo()->Players[i]->bot())
+            this->renderInfo.moveToTheVictim->bots.push_back(_bot);
         else
-            moveToTheVictim->victims.push_back(_bot);
+            this->renderInfo.moveToTheVictim->victims.push_back(_bot);
     }
 
     std::vector< rbw::Player* > _bots;
-    for(int i = 0; i < (int)World.worldInfo.Players.size(); i++)
-        if(World.worldInfo.Players[i]->bot())
-            _bots.push_back(World.worldInfo.Players[i]);
+    for(int i = 0; i < (int)this->renderInfo.world->getWorldInfo()->Players.size(); i++)
+        if(this->renderInfo.world->getWorldInfo()->Players[i]->bot())
+            _bots.push_back(this->renderInfo.world->getWorldInfo()->Players[i]);
 
     TVector victim_position;
-    for(int i = 0; i < (int)moveToTheVictim->bots.size(); i++)
-        if(moveToTheVictim->moveToTheVictim(moveToTheVictim->bots[i],_bots[i],&victim_position,&direction_bot))
-            World.AddBouncingBomb(moveToTheVictim->bots[i].name,sf::Vector2i(victim_position.x,victim_position.y));
-    moveToTheVictim->bots.clear();
-    moveToTheVictim->victims.clear();
+    for(int i = 0; i < (int)this->renderInfo.moveToTheVictim->bots.size(); i++){
+        if(this->renderInfo.moveToTheVictim->moveToTheVictim(this->renderInfo.moveToTheVictim->bots[i],_bots[i],&victim_position,&direction_bot))
+            this->renderInfo.world->AddBouncingBomb(this->renderInfo.moveToTheVictim->bots[i].name,sf::Vector2i(victim_position.x,victim_position.y));
+        this->renderInfo.world->AddMoveRequest(this->renderInfo.moveToTheVictim->bots[i].name, direction_bot);
+    }
+    this->renderInfo.moveToTheVictim->bots.clear();
+    this->renderInfo.moveToTheVictim->victims.clear();
     //-----------------------------------------------------------------//
 
+    float ElapsedTime = this->renderInfo.world->SimulateNextStep();
 
-    sendToClient(World.ExportEvents());
-    sendToClient(World.ExportPlayerInfo());
     std::vector< rbw::GraphicObject >* objects=new std::vector< rbw::GraphicObject >;
-    World.GetObjects(objects);
+    this->renderInfo.world->GetObjects(objects);
+
+    sendToClient(this->renderInfo.world->ExportEvents());
+    sendToClient(this->renderInfo.world->ExportPlayerInfo());
     sendToClient(*objects);
+
     std::cout << objects->size() << std::endl;
     delete objects;
 
@@ -173,9 +188,8 @@ float InGame::MoveThisWorld()//QTimerEvent* event,TimerEvent,MoveThisWorld ((^.^
      * into the following cycle:
      ****************************************************/
 
-
     rbw::Team * winningTeam;
-    if(World.RoundEnded(winningTeam))
+    if(this->renderInfo.world->RoundEnded(winningTeam))
     {
        Round++;qDebug()<<"Rounde:"<<Round-1<<" ended.("<<IndexOfGame<<")";
        sendToClient("Rounde:"+QString::number(Round-1)+" ended.");
@@ -185,7 +199,7 @@ float InGame::MoveThisWorld()//QTimerEvent* event,TimerEvent,MoveThisWorld ((^.^
        }
        else
        {
-           World.RoundDraw();
+           this->renderInfo.world->RoundDraw();
        }
     }
     return ElapsedTime;
@@ -312,27 +326,27 @@ void InGame::ReadyRead(int UserIndex, QString str)
     }
     /*if(str=="Non")
     {
-        World.AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_NODIRECTION);
+        this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_NODIRECTION);
         return;
     }
     if(str=="U")
     {
-        World.AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_UP);
+        this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_UP);
         return;
     }
     if(str=="D")
     {
-        World.AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_LEFT);
+        this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_LEFT);
         return;
     }
     if(str=="L")
     {
-        World.AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_LEFT);
+        this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_LEFT);
         return;
     }
     if(str=="R")
     {
-        World.AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_RIGHT);
+        this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),rbw::DIRECTION_RIGHT);
         return;
     }*/
     if(str.contains(qre))
@@ -342,23 +356,23 @@ void InGame::ReadyRead(int UserIndex, QString str)
         vector.y=qre.cap(3).toInt();
         if(qre.cap(1)=="AMR")
         {
-            World.AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),vector);
+            this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),vector);
         }
         if(qre.cap(1)=="BB")
         {
-            World.AddBouncingBomb(UserInfo[UserIndex]->UserName.toStdString(),vector);
+            this->renderInfo.world->AddBouncingBomb(UserInfo[UserIndex]->UserName.toStdString(),vector);
             qDebug()<<"BB:"<<vector.x<<","<<vector.y;
             return;
         }
         if(qre.cap(1)=="HM")
         {
-            World.AddHomingMissile(UserInfo[UserIndex]->UserName.toStdString(),vector);
+            this->renderInfo.world->AddHomingMissile(UserInfo[UserIndex]->UserName.toStdString(),vector);
             qDebug()<<"HM:"<<vector.x<<","<<vector.y;
             return;
         }
         if(qre.cap(1)=="G")
         {
-            World.AddGrenade(UserInfo[UserIndex]->UserName.toStdString(),vector);
+            this->renderInfo.world->AddGrenade(UserInfo[UserIndex]->UserName.toStdString(),vector);
             qDebug()<<"G:"<<vector.x<<","<<vector.y;
             return;
         }

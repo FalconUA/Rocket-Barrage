@@ -102,7 +102,7 @@ void Player::Move(sf::Vector2i direction)
     bool can_move_hor = true;
     new_x = p0.x + p_new.x;
     new_y = p0.y;
-    for (int i=0; i<this->worldInfo->wallForPlayer.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->wallForPlayer.size(); i++){
         bool temp;
 
         int y1 = this->worldInfo->wallForPlayer[i].rect.top;
@@ -117,7 +117,7 @@ void Player::Move(sf::Vector2i direction)
     bool can_move_ver = true;
     new_x = p0.x;
     new_y = p0.y + p_new.y;
-    for (int i=0; i<this->worldInfo->wallForPlayer.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->wallForPlayer.size(); i++){
         bool temp;
 
         int y1 = this->worldInfo->wallForPlayer[i].rect.top;
@@ -288,7 +288,7 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
 {
     *victim = NULL;        
 
-    for (int i=0; i<this->worldInfo->Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo->Players[i];
         if (tmpPlayer == this->owner)
             continue;
@@ -307,7 +307,7 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
 
     sf::Vector2f pAns = sf::Vector2f(-1.0f,-1.0f);
 
-    for (int i=0; i<this->worldInfo->wallForRocket.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
         sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
         //has collision with i-th rectangle
         rbw::intPolygon tmpPolygon(tmp);        
@@ -410,7 +410,7 @@ void BouncingBomb::SimulateNextStep()
 sf::Vector2f BouncingBomb::getCollisionWithPlayers(Player **victim)
 {
     *victim = NULL;    
-    for (int i=0; i<this->worldInfo->Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo->Players[i];
 
         if (tmpPlayer == this->owner) continue;
@@ -437,7 +437,7 @@ sf::Vector2f BouncingBomb::getExplosionPoint(Player **victim)
         return pAns;
     }
 
-    for (int i=0; i<this->worldInfo->wallForRocket.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
         sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
         //has collision with i-th rectangle
         rbw::intPolygon tmpPolygon(tmp);
@@ -454,7 +454,7 @@ sf::Vector2f BouncingBomb::getReflexVector()
 {    
     sf::Vector2f pAns = sf::Vector2f(-1.0f,-1.0f);
 
-    for (int i=0; i<this->worldInfo->wallForRocket.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
         sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
         //has collision with i-th rectangle
         rbw::intPolygon tmpPolygon(tmp);
@@ -566,7 +566,7 @@ void Grenade::SimulateNextStep()
         this->position = this->DestinationPoint;
         this->zoom_coefficient = 1.0;
 
-        for (int i=0; i<this->worldInfo->Players.size(); i++){
+        for (int i=0; i< (int)this->worldInfo->Players.size(); i++){
             rbw::Player * tmpPlayer = this->worldInfo->Players[i];
             sf::Vector2f pos = tmpPlayer->GetPosition();
             sf::Vector2f dis (pos.x - this->position.x, pos.y - this->position.y);
@@ -652,7 +652,7 @@ void WorldSimulator::Init(Level *level, float FPS)
     this->worldInfo.wallForRocket = level->GetObjects("wrocket");
 
     std::vector< Object > spawn = level->GetObjects("spawn");
-    for (int i=0; i<spawn.size(); i++){
+    for (int i=0; i< (int)spawn.size(); i++){
         rbw::spawnPos * newpos = new rbw::spawnPos;
         newpos->occupied = false;
         if (spawn[i].rect.width == 0)
@@ -667,7 +667,7 @@ void WorldSimulator::Init(Level *level, float FPS)
 bool WorldSimulator::AddPlayer(std::string PlayerName, Team team, bool isBot)
 {
     rbw::spawnPos * PlayerSpawnPosition = NULL;
-    for (int i=0; i<this->worldInfo.spawnPositions.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.spawnPositions.size(); i++){
         PlayerSpawnPosition = this->worldInfo.spawnPositions[i];
         if ((PlayerSpawnPosition->occupied == false) &&
                 (PlayerSpawnPosition->team == team))
@@ -685,7 +685,7 @@ bool WorldSimulator::AddPlayer(std::string PlayerName, Team team, bool isBot)
 bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mousePosition)
 {
     rbw::Player * owner = NULL;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         owner = worldInfo.Players[i];
         if (owner->GetPlayerName() == PlayerName) break;
     }
@@ -701,7 +701,8 @@ bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mouseP
     float b = (float) mousePosition.y - p0.y;
 
     double len = sqrt(a*a + b*b);
-    float mSpeedTimeFactor = 1000.0 / this->worldInfo.FPS;
+
+    //float mSpeedTimeFactor = 1000.0 / this->worldInfo.FPS;
 
     // X per frame
     // 60 FPS;
@@ -710,6 +711,7 @@ bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mouseP
     // so, (X*60/1000) * (1000/k) pixels per frame, k - time per frame
 
     //float velocity = mSpeedTimeFactor * rbw::MAX_HOMING_MISSILE_SPEED; // in pixels
+
     float velocity = this->worldInfo.ElapsedTime.asMilliseconds() * rbw::GameParam::MAX_BOUNCING_BOMB_SPEED;
 
     double koef = velocity / len;
@@ -744,11 +746,9 @@ bool WorldSimulator::AddBouncingBomb(std::string PlayerName, sf::Vector2i mouseP
     return true;
 }
 bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mousePosition)
-{
-    int sx, sy;
-
+{    
     Player * owner = NULL;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         owner = this->worldInfo.Players[i];
         if (owner->GetPlayerName() == PlayerName) break;
     }
@@ -761,7 +761,7 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
 
     Player * target = NULL;
     double distance = 1000000000.0f;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         Player * tmpPlayer = this->worldInfo.Players[i];
 
         if (tmpPlayer->GetPlayerName() == owner->GetPlayerName())
@@ -775,7 +775,7 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
 /*
         bool is_visible = true;
 
-        for (int i=0; i<this->worldInfo.wallForRocket.size(); i++){
+        for (int i=0; i< (int)this->worldInfo.wallForRocket.size(); i++){
             sf::Rect< int > tmp = this->worldInfo.wallForRocket[i].rect;
             //has collision with i-th rectangle
             rbw::intPolygon tmpPolygon(tmp);
@@ -802,7 +802,7 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
 
     /*
     // Check if owner can see his victim
-    for (int i=0; i<this->worldInfo->wallForRocket.size(); i++){
+    for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
         sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
         //has collision with i-th rectangle
         rbw::intPolygon tmpPolygon(tmp);
@@ -839,7 +839,7 @@ bool WorldSimulator::AddHomingMissile(std::string PlayerName, sf::Vector2i mouse
 bool WorldSimulator::AddGrenade(std::string PlayerName, sf::Vector2i mousePosition)
 {
     Player * owner = NULL;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         owner = this->worldInfo.Players[i];
         if (owner->GetPlayerName() == PlayerName) break;
     }
@@ -847,9 +847,7 @@ bool WorldSimulator::AddGrenade(std::string PlayerName, sf::Vector2i mousePositi
     if (owner->isAlive() == false) return false;
     if (owner->GrenadesLeft <= 0) return false;
 
-    std::cout << "Grenade owner: " << owner->GetPlayerName() << std::endl;
-    sf::Vector2f sp = owner->GetPosition();
-
+    std::cout << "Grenade owner: " << owner->GetPlayerName() << std::endl;    
 
     // creating new rocket
     rbw::G_ChainElement * newElement = new rbw::G_ChainElement;
@@ -877,7 +875,7 @@ bool WorldSimulator::AddGrenade(std::string PlayerName, sf::Vector2i mousePositi
 bool WorldSimulator::AddMoveRequest(std::string PlayerName, sf::Vector2i direction)
 {
     rbw::Player * currPlayer = NULL;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmp = this->worldInfo.Players[i];
         if (tmp->GetPlayerName() == PlayerName){
             currPlayer = tmp;
@@ -922,7 +920,7 @@ float WorldSimulator::SimulateNextStep()
 bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
 {
     objects->clear();
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         GraphicObject newobject;
         Player* tmp = this->worldInfo.Players[i];
         sf::Vector2f p0 = tmp->GetPosition();
@@ -986,7 +984,7 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
         objects->push_back(newobject);
     }
 
-    for (int i=0; i<this->worldInfo.Explosions.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Explosions.size(); i++){
         objects->push_back(this->worldInfo.Explosions[i]);
     }
     this->worldInfo.Explosions.clear();
@@ -995,7 +993,7 @@ bool WorldSimulator::GetObjects(std::vector< GraphicObject > * objects)
 std::vector< rbw::PlayerExportInformation > WorldSimulator::ExportPlayerInfo()
 {
     std::vector< rbw::PlayerExportInformation > answer(0);
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
         rbw::PlayerExportInformation tmpExportInfo;
         tmpExportInfo.DamageDealt = tmpPlayer->DamageDealt;
@@ -1023,13 +1021,13 @@ std::vector< std::string > WorldSimulator::ExportEvents()
 bool WorldSimulator::RoundEnded(rbw::Team * WinningTeam)
 {
     bool allBlackAreDead = true;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
         if (tmpPlayer->GetTeam() == rbw::TEAM_BLACK)
             allBlackAreDead = (allBlackAreDead && (tmpPlayer->isAlive() == false));
     }
     bool allWhiteAreDead = true;
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
         if (tmpPlayer->GetTeam() == rbw::TEAM_WHITE)
             allWhiteAreDead = (allWhiteAreDead && (tmpPlayer->isAlive() == false));
@@ -1074,7 +1072,7 @@ bool WorldSimulator::RoundDraw()
     this->worldInfo.Grenades.FirstInChain = NULL;
     this->worldInfo.Grenades.LastInChain = NULL;
 
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
         tmpPlayer->Respawn();
     }
@@ -1105,12 +1103,12 @@ WorldSimulator::~WorldSimulator()
         delete tmp;
     }
 
-    for (int i=0; i<this->worldInfo.spawnPositions.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.spawnPositions.size(); i++){
         rbw::spawnPos * tmpPos = this->worldInfo.spawnPositions[i];
         delete tmpPos;
     }
 
-    for (int i=0; i<this->worldInfo.Players.size(); i++){
+    for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
         delete tmpPlayer;
     }    

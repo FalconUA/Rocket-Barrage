@@ -5,6 +5,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = rbServer
 TEMPLATE = app
 CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += Server/
 INCLUDEPATH += Engine/

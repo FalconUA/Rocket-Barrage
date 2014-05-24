@@ -130,6 +130,7 @@ private:
     int numberOfBotBlackTeam=0;
     int numberOfBotWhiteTeam=0;
     bool WhiteKing=0;
+    bool Balance=1;
 public:
     Lobby(ClientsInfo* ciCreator,QString LobbyName,QObject* server):LobbyName(LobbyName),server(server),
         QObject(0)
@@ -149,6 +150,7 @@ public:
     void newKing();
     bool isKing(QString);
     void StartGame();
+    void DeleteLobby();
     QVector<ClientsInfo*> take_vectorOfWhiteTeam();
     QVector<ClientsInfo*> take_vectorOfBlackTeam();
     QString lengthOfTeam();

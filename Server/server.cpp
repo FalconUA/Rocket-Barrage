@@ -65,7 +65,7 @@ void Server::slotDisconnect()
        }
        case inGame:
        {
-           //sendToGame(qtcpClient->TakeInfo("I"),"SUR");
+           sendToGame(qtcpClient->TakeInfo("I"),"SUR");
            break;
        }
        case inLobby:
@@ -332,42 +332,109 @@ void Server::sendToClient(QTcpSocket* qtcpClient,const QString& str)
     out<<quint16(arrBlock.size()-sizeof(quint16));
     qtcpClient->write(arrBlock);
 }
+void Server::sendToClient(QTcpSocket* qtcpClient, std::vector< std::string > str)
+{
+    QByteArray arrBlock;
+    QDataStream out(&arrBlock,QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_2);
+
+    QVector<std::string> qvector=QVector<std::string>::fromStdVector(str);
+    out<< quint16(0)<<quint8(1)<<qvector.size();
+    if(qvector.size()==0)return;
+
+    QVector<std::string>::iterator it=qvector.begin();
+    QString stdstring;
+    for(;it!=qvector.end();it++)
+    {
+        stdstring=QString::fromStdString(*it);
+        out<<stdstring;
+    }
+
+    out.device()->seek(0);
+
+    out<<quint16(arrBlock.size()-sizeof(quint16));
+    qtcpClient->write(arrBlock);
+}
 void Server::sendToClient(QTcpSocket* qtcpClient, std::vector< rbw::PlayerExportInformation > vector)
 {
     QByteArray arrBlock;
     QDataStream out(&arrBlock,QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_2);
 
-    QByteArray qba;
-    qba.fromRawData((const char *)&vector,sizeof(vector));
-    out<< quint16(0)<<quint8(1)<<qba;
+    QVector<rbw::PlayerExportInformation > qvector=QVector<rbw::PlayerExportInformation >::fromStdVector(vector);
+    out<< quint16(0)<<quint8(2)<<qvector.size();
+    if(qvector.size()==0)return;
+
+    rbw::PlayerExportInformation PlayerEI;
+    QString PlayerName;
+    int Kill;
+    int Death;
+    int DamageDealt;
+    int HomingMissilesLeft;
+    int BouncingBombsLeft;
+    int GrenadesLeft;
+    bool isDead;
+
+    QVector<rbw::PlayerExportInformation >::iterator it=qvector.begin();
+    for(;it!=qvector.end();it++)
+    {
+        PlayerEI=*it;
+        PlayerName=QString::fromStdString(PlayerEI.PlayerName);
+        Kill=PlayerEI.Kill;
+        Death=PlayerEI.Death;
+        DamageDealt=PlayerEI.DamageDealt;
+        HomingMissilesLeft=PlayerEI.HomingMissilesLeft;
+        BouncingBombsLeft=PlayerEI.BouncingBombsLeft;
+        GrenadesLeft=PlayerEI.GrenadesLeft;
+        isDead=PlayerEI.isDead;
+        out<<PlayerName<<Kill<<Death<<DamageDealt<<HomingMissilesLeft<<BouncingBombsLeft<<GrenadesLeft<<isDead;
+    }
     out.device()->seek(0);
 
     out<<quint16(arrBlock.size()-sizeof(quint16));
     qtcpClient->write(arrBlock);
 }
-void Server::sendToClient(QTcpSocket* qtcpClient, std::vector< std::string > str)
-{
-    QByteArray arrBlock;
-    QDataStream out(&arrBlock,QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_2);
-    QByteArray qba;
-    qba.fromRawData((const char *)&str,sizeof(str));
-    out<< quint16(0)<<quint8(2)<<qba;
-    out.device()->seek(0);
 
-    out<<quint16(arrBlock.size()-sizeof(quint16));
-    qtcpClient->write(arrBlock);
-}
 void Server::sendToClient(QTcpSocket* qtcpClient, std::vector<rbw::GraphicObject> objects )
 {
     QByteArray arrBlock;
     QDataStream out(&arrBlock,QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_4_2);
 
-    QByteArray qba;
-    qba.fromRawData((const char *)&objects,sizeof(objects));
-    out<< quint16(0)<<quint8(3)<<qba;
+    QVector<rbw::GraphicObject > qvector=QVector<rbw::GraphicObject>::fromStdVector(objects);
+
+    out<< quint16(0)<<quint8(3)<<qvector.size();
+    if(qvector.size()==0)return;
+
+    rbw::GraphicObject Object;
+
+    int x;
+    int y;
+    float velocity_x;
+    float velocity_y;
+    rbw::Graphic::GraphicObjectType type;
+    QString Name;
+    rbw::Team team;
+    int HealthPoint;
+    float zoom_coefficient;
+
+    QVector<rbw::GraphicObject>::iterator it=qvector.begin();
+    for(;it!=qvector.end();it++)
+    {
+        Object=*it;
+        x=Object.x;
+        y=Object.y;
+        velocity_x=Object.velocity_x;
+        velocity_y=Object.velocity_y;
+        out<<x<<y<<velocity_x<<velocity_y;
+        type=Object.type;
+        Name=QString::fromStdString(Object.Name);
+        team=Object.team;
+        out<<int(type)<<Name<<int(team);
+        HealthPoint=Object.HealthPoint;
+        zoom_coefficient=Object.zoom_coefficient;
+        out<<HealthPoint<<zoom_coefficient;
+    }
     out.device()->seek(0);
 
     out<<quint16(arrBlock.size()-sizeof(quint16));
@@ -463,7 +530,7 @@ void Server::slotinLobbyCreateGame()
     lobby->RefreshNumberOfBot(botBlackTeam,botWhiteTeam);
     ingame[j]->addBot(botWhiteTeam,botBlackTeam);
     ingame[j]->start();
-    lobby->sig_delete();
+    lobby->DeleteLobby();
 }
 
 void Server::slotDestroyGame(int Index)
@@ -763,7 +830,7 @@ bool Lobby::isKing(QString UserName)
 }
 void Lobby::StartGame()
 {
-    if(WhiteTeam.size()+numberOfBotWhiteTeam==BlackTeam.size()+numberOfBotBlackTeam)
+    if((WhiteTeam.size()+numberOfBotWhiteTeam==BlackTeam.size()+numberOfBotBlackTeam)+!Balance)
     {
         sig_createTheGame();
     }
@@ -772,6 +839,11 @@ void Lobby::StartGame()
         SendtoClient("None");
     }
 }
+void Lobby::DeleteLobby()
+{
+    sig_delete();
+}
+
 QVector<ClientsInfo*> Lobby::take_vectorOfWhiteTeam()
 {
     return WhiteTeam;
