@@ -79,7 +79,7 @@ void Game::CheckKey(){
     if (key.isKeyPressed(sf::Keyboard::Down)) direction_bot.y++;//this->server->AddMoveRequest("Bot", rbw::DIRECTION_DOWN);
 
     this->server->AddMoveRequest(this->MyName, direction_player);
-    this->server->AddMoveRequest("Bot", direction_bot);
+    this->server->AddMoveRequest("Bot0", direction_bot);
 
     if (key.isKeyPressed(sf::Keyboard::R)){        
         this->server->AddHomingMissile(this->MyName, sf::Vector2i(mouse_pos.x, mouse_pos.y));
@@ -158,7 +158,6 @@ void Game::GenerateNextFrame(){
     moveToTheVictim->bots.clear();
     moveToTheVictim->victims.clear();
     //-----------------------------------------------------------------//
-
 
 
     float ElapsedTime = server->SimulateNextStep();    

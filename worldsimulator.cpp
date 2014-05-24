@@ -73,7 +73,7 @@ void Player::Move(sf::Vector2i direction)
 
     if (p_new == sf::Vector2f(0.f, 0.f)) return ;
 
-    float mSpeedTimeFactor = 1000.0 / this->worldInfo->FPS;
+    //float mSpeedTimeFactor = 1000.0 / this->worldInfo->FPS;
 
     // X per frame
     // 60 FPS;
@@ -81,10 +81,16 @@ void Player::Move(sf::Vector2i direction)
     // new FPS = k;
     // so, (X*60/1000) * (1000/k) pixels per frame, k - time per frame
 
-    float velocity = mSpeedTimeFactor * rbw::GameParam::MAX_PLAYER_SPEED; // in pixels
-    velocity = this->worldInfo->ElapsedTime.asMilliseconds() * rbw::GameParam::MAX_PLAYER_SPEED;
-    p_new.x *= velocity;
-    p_new.y *= velocity;
+    //float velocity = mSpeedTimeFactor * rbw::GameParam::MAX_PLAYER_SPEED; // in pixels
+
+    float len = sqrt(p_new.x * p_new.x + p_new.y * p_new.y);
+    float velocity = this->worldInfo->ElapsedTime.asMilliseconds() * rbw::GameParam::MAX_PLAYER_SPEED;
+    float koef = velocity / len;
+
+    //std::cout << "koef: " << koef << std::endl;
+
+    p_new.x *= koef; //* velocity;
+    p_new.y *= koef;// * velocity;
 
     this->speed = sf::Vector2f(p_new.x , p_new.y);
 
@@ -567,7 +573,7 @@ void Grenade::SimulateNextStep()
             float dis_squared = (dis.x * dis.x) + (dis.y * dis.y);
             if (dis_squared < rbw::GameParam::GRENADE_RADIUS_OF_EFFECT_SQUARED + rbw::fEPS){
                 bool killed = tmpPlayer->Hit(rbw::GameParam::GRENADE_DAMAGE);
-                this->owner->DamageDealt++;
+                this->owner->DamageDealt += rbw::GameParam::GRENADE_DAMAGE;
                 if (killed){
                     this->owner->Kill++;
                     tmpPlayer->Death++;

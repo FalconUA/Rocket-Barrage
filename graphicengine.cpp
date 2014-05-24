@@ -24,6 +24,7 @@ bool ImportModelData(rbw::Graphic::modelData * model, const std::string fileName
     sf::Vector2u size = model->texture.getSize();
 
     model->sprite.setOrigin(size.x/2, size.y/2);
+    return true;
 }
 bool ImportAnimationData(rbw::Graphic::AnimationData * animation, const std::string filename, sf::Vector2u Size)
 {
@@ -424,54 +425,62 @@ bool GraphicEngine::ShowScoreTable(std::vector< rbw::PlayerExportInformation > p
     //std::sort(peiVector.begin(), peiVector.end());
 
     std::string tableStr;
-    tableStr += " Team Black:                                              \n";
-    tableStr += "|--------------------------|------|-------|--------------|\n";
-    tableStr += "|Nickname                  | Kill | Death | Damage dealt |\n";
-    tableStr += "|--------------------------|------|-------|--------------|\n";
+    tableStr += " Team Black:                                                         \n";
+    tableStr += "|--------------------------|------|-------|--------------|----------|\n";
+    tableStr += "| Nickname                 | Kill | Death | Damage dealt | HM/BB/G  |\n";
+    tableStr += "|--------------------------|------|-------|--------------|----------|\n";
 
-    //            12345678901234567890123456 123456 1234567 12345678901234
-    //              26                          6     7        14
+    //            12345678901234567890123456 123456 1234567 12345678901234 1234567890
+    //              26                          6     7        14              10
 
-    for (int i=0; i<peiVector.size(); i++){
+    for (int i=0; (int) i<peiVector.size(); i++){
         rbw::PlayerExportInformation tmpInfo = peiVector[i];
         if (tmpInfo.team != rbw::TEAM_BLACK) continue;
         std::string nickName = tmpInfo.PlayerName;
         std::string kill = std::to_string(tmpInfo.Kill);
         std::string death = std::to_string(tmpInfo.Death);
         std::string damageDealt = std::to_string(tmpInfo.DamageDealt);
+        std::string hm_bb_g = std::to_string(tmpInfo.HomingMissilesLeft) + "/" +
+                std::to_string(tmpInfo.BouncingBombsLeft) + "/" +
+                std::to_string(tmpInfo.GrenadesLeft);
 
-        nickName.resize(26,' ');
-        kill.resize(6,' ');
-        death.resize(7,' ');
-        damageDealt.resize(14,' ');
+        nickName.resize(25,' ');
+        kill.resize(5,' ');
+        death.resize(6,' ');
+        damageDealt.resize(13,' ');
+        hm_bb_g.resize(9,' ');
 
-        std::string newLine("|" + nickName + "|" + kill + "|" + death + "|" + damageDealt + "|\n");
+        std::string newLine("| " + nickName + "| " + kill + "| " + death + "| " + damageDealt + "| " + hm_bb_g + "|\n");
         tableStr += newLine;
     }
-    tableStr += "|--------------------------|------|-------|--------------|\n";
-    tableStr += "                                                          \n";
-    tableStr += " Team White:                                              \n";
-    tableStr += "|--------------------------|------|-------|--------------|\n";
-    tableStr += "|Nickname                  | Kill | Death | Damage dealt |\n";
-    tableStr += "|--------------------------|------|-------|--------------|\n";
+    tableStr += "|--------------------------|------|-------|--------------|----------|\n";
+    tableStr += "                                                                     \n";
+    tableStr += " Team White:                                                         \n";
+    tableStr += "|--------------------------|------|-------|--------------|----------|\n";
+    tableStr += "| Nickname                 | Kill | Death | Damage dealt | HM/BB/G  |\n";
+    tableStr += "|--------------------------|------|-------|--------------|----------|\n";
 
-    for (int i=0; i<peiVector.size(); i++){
+    for (int i=0; (int) i<peiVector.size(); i++){
         rbw::PlayerExportInformation tmpInfo = peiVector[i];
         if (tmpInfo.team != rbw::TEAM_WHITE) continue;
         std::string nickName = tmpInfo.PlayerName;
         std::string kill = std::to_string(tmpInfo.Kill);
         std::string death = std::to_string(tmpInfo.Death);
         std::string damageDealt = std::to_string(tmpInfo.DamageDealt);
+        std::string hm_bb_g = std::to_string(tmpInfo.HomingMissilesLeft) + "/" +
+                std::to_string(tmpInfo.BouncingBombsLeft) + "/" +
+                std::to_string(tmpInfo.GrenadesLeft);
 
-        nickName.resize(26,' ');
-        kill.resize(6,' ');
-        death.resize(7,' ');
-        damageDealt.resize(14,' ');
+        nickName.resize(25,' ');
+        kill.resize(5,' ');
+        death.resize(6,' ');
+        damageDealt.resize(13,' ');
+        hm_bb_g.resize(9,' ');
 
-        std::string newLine("|" + nickName + "|" + kill + "|" + death + "|" + damageDealt + "|\n");
+        std::string newLine("| " + nickName + "| " + kill + "| " + death + "| " + damageDealt + "| " + hm_bb_g + "|\n");
         tableStr += newLine;
     }
-    tableStr += "|--------------------------|------|-------|--------------|\n";
+    tableStr += "|--------------------------|------|-------|--------------|----------|\n";
 
     sf::Text tableText;
     tableText.setFont(this->UbuntuMono);
@@ -485,6 +494,7 @@ bool GraphicEngine::ShowScoreTable(std::vector< rbw::PlayerExportInformation > p
     this->outputWindow->draw(background);
     this->outputWindow->draw(tableText);
 
+    return true;
 }
 
 }; // end of namespace rbw
