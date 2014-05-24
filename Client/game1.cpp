@@ -1,8 +1,12 @@
 #include "game1.h"
 Client::Client(int nPort, QWidget *pwgt) : QWidget(pwgt),
     strHost("localhost"),nPort(nPort)
-                    , m_nNextBlockSize(0),qre("Start Game:"),qpBomb("Resources/black-bomb-hi.png"),qpMap2("Resources/old-world-map.jpg"),
-                    qpRocket("Resources/Rocket.png"),qpMap("Resources/world_map-wide.jpg"),qsLobbyBlackTeam("<span style=color:#000000><H1>BLACK Team</H1></span style>"),
+                    , m_nNextBlockSize(0),qre("Start Game:"),
+                    qpBomb("Resources/window/black-bomb-hi.png"),
+                    qpMap2("Resources/window/old-world-map.jpg"),
+                    qpRocket("Resources/window/Rocket.png"),
+                    qpMap("Resources/window/old-world-map.jpg"),
+                    qsLobbyBlackTeam("<span style=color:#000000><H1>BLACK Team</H1></span style>"),
                     qreUserName("[a-zA-z]{4,16}$"),
                     qsLobbyWhiteTeam("<span style=color:#FFFFFF><H1>WHITE Team</H1></span style>"),
                     qreInfo("([a-zA-z]{4,16}) ([0-9]+) ([0-9]+) ((?:Menu)|(?:SearchGame)|(?:In Game));"),

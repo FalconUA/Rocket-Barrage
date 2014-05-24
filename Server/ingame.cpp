@@ -18,7 +18,7 @@ InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-
     }
 
     this->renderInfo.FPS = 60.0f;
-    this->renderInfo.level.LoadFromFile("Resources/maps/test_new.tmx");
+    this->renderInfo.level.LoadFromFile("Resources/maps/desert.tmx");
 
     this->renderInfo.world = new rbw::WorldSimulator;
     this->renderInfo.world->Init(&(this->renderInfo.level), this->renderInfo.FPS);

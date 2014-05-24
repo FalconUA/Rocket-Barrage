@@ -15,7 +15,7 @@
 
 #include <Tiny/tinystr.h>
 #include <Tiny/tinyxml.h>
-#include <Tiny/tinyxml2.h
+#include <Tiny/tinyxml2.h>
 
 #include <level.h>
 #include <graphicobject.h>

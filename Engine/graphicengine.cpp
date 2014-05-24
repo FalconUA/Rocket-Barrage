@@ -11,7 +11,7 @@ GraphicEngine::GraphicEngine()
     this->Explosions.First = NULL;
     this->Explosions.Last = NULL;
 
-    this->UbuntuMono.loadFromFile("Resources/UbuntuMono-R.ttf");
+    this->UbuntuMono.loadFromFile("Resources/fonts/UbuntuMono-R.ttf");
 }
 
 bool ImportModelData(rbw::Graphic::modelData * model, const std::string fileName, float hitboxRadius)
@@ -67,7 +67,7 @@ bool GraphicEngine::initOutputWindow(sf::RenderWindow *window)
     this->outputWindow = window;
     if (window == NULL) return false;
 
-    if (!this->deskTexture.loadFromFile("Resources/Texture.jpg")){
+    if (!this->deskTexture.loadFromFile("Resources/window/Texture.jpg")){
         std::cout << "Failed to load desk sheet." << std::endl;
     }
 

@@ -19,7 +19,9 @@ typedef struct
     rbw::GraphicEngine * graphic;
 
     bool Switch_Mouse;
-    rbw::GraphicObject mouseObject;
+    bool ShowScore;
+    rbw::GraphicObject mouseObject;    
+    sf::Clock simClock;
 
     sf::Event event;
 
@@ -48,6 +50,7 @@ private:
     bool CheckEvents();
 
     RenderInfo renderInfo;
+    std::vector<TRectangle> getWalls();
 
     std::string MyName;
 

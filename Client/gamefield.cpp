@@ -1,16 +1,20 @@
 #include "gamefield.h"
 #include "QApplication"
+#include <sstream>
+#include <string>
+
 GameField::GameField(QObject* client,bool isSingleGame):client(client),TimeStep(0.5*1000),isSingleGame(isSingleGame)
 {
     this->renderInfo.isSinglePlayer = isSingleGame;
     this->renderInfo.FPS = 60.0f;
+
     std::cout << "debug window\n\n";
 
-    this->renderInfo.level.LoadFromFile("Resources/maps/test_new.tmx");
+    this->renderInfo.level.LoadFromFile("Resources/maps/desert.tmx");
     int h = this->renderInfo.level.GetHeight();
     int w = this->renderInfo.level.GetWidth();
 
-    this->renderInfo.window = new sf::RenderWindow(sf::VideoMode(w + 150, h), "Battle Tanks vodka edition");
+    this->renderInfo.window = new sf::RenderWindow(sf::VideoMode(w + 200, h), "ROCKET BARRAGE");
 
     std::cout << "window Created" << std::endl;
     this->renderInfo.window->setActive(false);
@@ -21,6 +25,7 @@ GameField::GameField(QObject* client,bool isSingleGame):client(client),TimeStep(
     this->renderInfo.window->setMouseCursorVisible(false);
 
     this->renderInfo.Switch_Mouse = false;
+    this->renderInfo.ShowScore = false;
     this->renderInfo.mouseObject.type = rbw::Graphic::MOUSE_POINTER_NORMAL;
 
     this->renderInfo.graphic = new rbw::GraphicEngine;
@@ -34,25 +39,33 @@ GameField::GameField(QObject* client,bool isSingleGame):client(client),TimeStep(
 
         this->renderInfo.moveToTheVictim = new MoveToTheVictim;
         this->renderInfo.botcount = 0;
-        std::vector< Object > walls = this->renderInfo.world->worldInfo.wallForPlayer;
-        Object wall;
-        std::vector<TRectangle> * my_walls = &(this->renderInfo.moveToTheVictim->walls);
-        TRectangle my_wall;
-        for(int i = 0; i < (int)walls.size(); i++)
-        {
-            wall = walls[i];
-            my_wall.A.x = wall.rect.left;
-            my_wall.A.y = wall.rect.top;
-            my_wall.B.x = my_wall.A.x + wall.rect.width;
-            my_wall.B.y = my_wall.A.y + wall.rect.height;
-            my_walls->push_back(my_wall);
-        }
+
+        this->renderInfo.moveToTheVictim->walls = this->getWalls();
     }
+    this->renderInfo.simClock.restart();
     std::cout << "init completed!" << std::endl;
 }
 GameField::~GameField()
 {
 
+}
+
+std::vector<TRectangle> GameField::getWalls()
+{
+    std::vector< Object > walls = this->renderInfo.world->getWorldInfo()->wallForPlayer;
+    Object wall;
+    std::vector<TRectangle> my_walls;
+    TRectangle my_wall;
+    for(int i = 0; i < (int)walls.size(); i++)
+    {
+        wall = walls[i];
+        my_wall.A.x = wall.rect.left;
+        my_wall.A.y = wall.rect.top;
+        my_wall.B.x = my_wall.A.x + wall.rect.width;
+        my_wall.B.y = my_wall.A.y + wall.rect.height;
+        my_walls.push_back(my_wall);
+    }
+    return my_walls;
 }
 
 
@@ -100,13 +113,38 @@ void GameField::slotPause(bool b)
     pause=b;
 }
 bool GameField::MoveThisWorld()
-{
+{    
     std::cout << "start moving" << std::endl;
     if (this->renderInfo.isSinglePlayer == false){
+        float ElapsedTime = this->renderInfo.simClock.restart().asMilliseconds();
         this->renderInfo.level.Draw(*(this->renderInfo.window));
         this->renderInfo.graphic->Render(this->goVector);
-        std::cout<<this->goVector.size() << std::endl;
+        std::cout << "goVector length: " << this->goVector.size() << std::endl;
         rbw::DrawGraphicObject(this->renderInfo.window, &(this->renderInfo.mouseObject));
+        if (this->renderInfo.ShowScore){
+            this->renderInfo.graphic->ShowScoreTable(this->peiVector);
+        }
+        this->renderInfo.graphic->ShowEventList(this->stVector);
+
+        float fps = 1000.f / ElapsedTime;
+        int FPS = fps;
+
+        std::ostringstream ss;
+        ss << FPS;
+        std::string s(ss.str());
+
+        sf::Font font;
+        font.loadFromFile("Resources/fonts/UbuntuMono-R.ttf");
+        sf::Text text;
+        text.setFont(font);
+        text.setString("FPS: " + s);
+        text.setColor(sf::Color::White);
+
+        sf::Vector2u winSize = this->renderInfo.window->getSize();
+        text.setPosition(sf::Vector2f( winSize.x - 125, 25 ));
+
+
+        this->renderInfo.window->draw(text);
     }
     else
     {
@@ -117,15 +155,15 @@ bool GameField::MoveThisWorld()
         TPlayer _bot;
         sf::Vector2f tmp;
 
-        for(int i = 0; i < (int)this->renderInfo.world->worldInfo.Players.size(); i++)
+        for(int i = 0; i < (int)this->renderInfo.world->getWorldInfo()->Players.size(); i++)
         {
-            bot = this->renderInfo.world->worldInfo.Players[i];
+            bot = this->renderInfo.world->getWorldInfo()->Players[i];
             tmp = bot->GetPosition();
             _bot.coord.x = int(tmp.x);
             _bot.coord.y = int(tmp.y);
             _bot.speed = 1;
             _bot.name = bot->GetPlayerName();
-            if(this->renderInfo.world->worldInfo.Players[i]->bot())
+            if(this->renderInfo.world->getWorldInfo()->Players[i]->bot())
                 this->renderInfo.moveToTheVictim->bots.push_back(_bot);
                     else
                 this->renderInfo.moveToTheVictim->victims.push_back(_bot);
@@ -133,9 +171,9 @@ bool GameField::MoveThisWorld()
         }
 
         std::vector< rbw::Player* > _bots;
-        for(int i = 0; i < (int)this->renderInfo.world->worldInfo.Players.size(); i++)
-            if(this->renderInfo.world->worldInfo.Players[i]->bot())
-                _bots.push_back(this->renderInfo.world->worldInfo.Players[i]);
+        for(int i = 0; i < (int)this->renderInfo.world->getWorldInfo()->Players.size(); i++)
+            if(this->renderInfo.world->getWorldInfo()->Players[i]->bot())
+                _bots.push_back(this->renderInfo.world->getWorldInfo()->Players[i]);
 
         TVector victim_position;        
         for(int i = 0; i < (int)this->renderInfo.moveToTheVictim->bots.size(); i++){
@@ -158,10 +196,30 @@ bool GameField::MoveThisWorld()
         this->renderInfo.graphic->Render(this->goVector);
         rbw::DrawGraphicObject(this->renderInfo.window, &this->renderInfo.mouseObject);
 
-        if (this->ShowScore){
-            this->graphic->ShowScoreTable(this->server->ExportPlayerInfo());
+        if (this->renderInfo.ShowScore){
+            this->renderInfo.graphic->ShowScoreTable(pInfo);
         }
-        this->graphic->ShowEventList(this->server->ExportEvents());
+        this->renderInfo.graphic->ShowEventList(this->renderInfo.world->ExportEvents());
+
+        float fps = 1000.f / ElapsedTime;
+        int FPS = fps;
+
+        std::ostringstream ss;
+        ss << FPS;
+        std::string s(ss.str());
+
+        sf::Font font;
+        font.loadFromFile("Resources/fonts/UbuntuMono-R.ttf");
+        sf::Text text;
+        text.setFont(font);
+        text.setString("FPS: " + s);
+        text.setColor(sf::Color::White);
+
+        sf::Vector2u winSize = this->renderInfo.window->getSize();
+        text.setPosition(sf::Vector2f( winSize.x - 125, 25 ));
+
+
+        this->renderInfo.window->draw(text);
 
 
         rbw::Team winningTeam;
@@ -214,6 +272,7 @@ bool GameField::CheckKeyboard()
     if (key.isKeyPressed(sf::Keyboard::D)) direction_player.x++;//this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_RIGHT);
     if (key.isKeyPressed(sf::Keyboard::W)) direction_player.y--;//this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_UP);
     if (key.isKeyPressed(sf::Keyboard::S)) direction_player.y++;//this->server->AddMoveRequest(this->MyName, rbw::DIRECTION_DOWN);
+    this->renderInfo.ShowScore = (key.isKeyPressed(sf::Keyboard::Tab));
 
     this->AddMoveRequest(direction_player);
 }

@@ -6,41 +6,49 @@ TARGET = Client
 TEMPLATE = app
 CONFIG += console
 CONFIG   += c++11
+QMAKE_CXXFLAGS += -std=c++11
 
-SOURCES += main.cpp \
-    game1.cpp \
-    gamefield.cpp\
-        level.cpp \
-        Tiny/tinyxmlerror.cpp \
-        Tiny/tinyxml.cpp \
-        Tiny/tinystr.cpp \
-        Tiny/tinyxmlparser.cpp \
-        Tiny/tinyxml2.cpp \
-        worldsimulator.cpp \
-        worldphysic.cpp\
-        graphicobject.cpp\
-        graphicengine.cpp\
-        movetothevictim.cpp\
-        evadefromtherocket.cpp
+INCLUDEPATH += Client/
+INCLUDEPATH += Engine/
+INCLUDEPATH += Engine/Tiny/
+INCLUDEPATH += AI/
+
+SOURCES += \
+    client-main.cpp \
+    Client/game1.cpp \
+    Client/gamefield.cpp\
+    \
+    Engine/level.cpp \
+    Engine/Tiny/tinyxmlerror.cpp \
+    Engine/Tiny/tinyxml.cpp \
+    Engine/Tiny/tinystr.cpp \
+    Engine/Tiny/tinyxmlparser.cpp \
+    Engine/Tiny/tinyxml2.cpp \
+    Engine/graphicobject.cpp \
+    Engine/worldsimulator.cpp \
+    Engine/worldphysic.cpp \
+    Engine/graphicengine.cpp \
+    \
+    AI/evadefromtherocket.cpp \
+    AI/movetothevictim.cpp
 
 HEADERS  += \
-    game1.h \
-    gamefield.h\
-    rbwincludes.h\
-    level.h \
-    Tiled/tinystr.h \
-    Tiled/tinyxml.h \
-    Tiny/tinyxml.h \
-    Tiny/tinystr.h \
-    Tiny/tinyxml2.h \
-    graphicobject.h \
-    worldsimulator.h \
-    worldphysic.h \
-    graphicobject.h \
-    graphicengine.h \
-    worldconstant.h \
-    movetothevictim.h\
-    evadefromtherocket.h\
+    Client/game1.h \
+    Client/gamefield.h\
+    \
+    Engine/level.h \
+    Engine/Tiny/tinyxml.h \
+    Engine/Tiny/tinystr.h \
+    Engine/Tiny/tinyxml2.h \
+    Engine/graphicobject.h \
+    Engine/worldsimulator.h \
+    Engine/worldphysic.h \
+    Engine/worldconstant.h \
+    Engine/graphicengine.h \
+    Engine/rbwincludes.h \
+    \
+    AI/evadefromtherocket.h \
+    AI/movetothevictim.h
 
 INCLUDEPATH += Tiled/
 
