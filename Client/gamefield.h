@@ -29,6 +29,7 @@ typedef struct
     bool isSinglePlayer;
 
     MoveToTheVictim * moveToTheVictim;  //it's new
+    sf::Vector2u originalWinSize;
     int botcount;
 } RenderInfo;
 

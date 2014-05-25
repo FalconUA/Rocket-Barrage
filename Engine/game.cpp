@@ -33,6 +33,8 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
     this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK,false);
     this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,false);
     this->server->AddPlayer("Bot1", rbw::TEAM_WHITE,false);
+
+    this->winSize = this->window->getSize();
     return true;
 }
 
@@ -119,6 +121,8 @@ void Game::RespondToEvent(sf::Event *event){
         }
         if (event->key.code == sf::Keyboard::M)
             this->server->RoundDraw();
+        if (event->key.code == sf::Keyboard::Escape)
+            this->window->close();
     }    
 }
 
@@ -198,8 +202,8 @@ void Game::GenerateNextFrame(){
     text.setString("FPS: " + s);
     text.setColor(sf::Color::White);
 
-    sf::Vector2u winSize = this->window->getSize();
-    text.setPosition(sf::Vector2f( winSize.x - 125, 25 ));
+    //sf::Vector2u winSize = this->window->getSize();
+    text.setPosition(sf::Vector2f(this->winSize.x - 150, 25 ));
 
 
     this->window->draw(text);    

@@ -19,7 +19,10 @@ int main(int argc, char * argv[]){
     int h = level.GetHeight();
     int w = level.GetWidth();
 
-    sf::RenderWindow window(sf::VideoMode(w + 200, h), "ROCKET BARRAGE");
+    sf::VideoMode newmode = sf::VideoMode::getDesktopMode();
+
+
+    sf::RenderWindow window(sf::VideoMode(w + 200, h+10), "ROCKET BARRAGE",  sf::Style::None);
     //window.setMouseCursorVisible(false);
 
     window.setVerticalSyncEnabled(true); // call it once, after creating the window
@@ -33,7 +36,9 @@ int main(int argc, char * argv[]){
     Game NewGame("FalconRT");
     NewGame.Init(&server, &window, &level);    
 
-    sf::Clock clock;
+    window.setSize(sf::Vector2u(newmode.width, newmode.height));
+
+    sf::Clock clock;       
 
     bool redraw = true;
     while (window.isOpen()){
@@ -57,12 +62,12 @@ int main(int argc, char * argv[]){
         }
 
         if (redraw){
-        NewGame.CheckKey();
+            NewGame.CheckKey();
 
-        window.clear();
-        NewGame.GenerateNextFrame();        
-        window.display();
-        redraw = false;
+            window.clear();
+            NewGame.GenerateNextFrame();
+            window.display();
+            redraw = false;
         }
     }
     return 0;

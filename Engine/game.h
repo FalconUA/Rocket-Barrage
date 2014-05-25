@@ -24,6 +24,8 @@ public:
     void GenerateNextFrame();
 
 private:
+    sf::Vector2u winSize;
+
     GraphicObject mouse_object;
     std::string MyName;
     sf::RenderWindow * window;

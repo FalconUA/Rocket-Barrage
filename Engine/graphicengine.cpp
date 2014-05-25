@@ -75,9 +75,10 @@ bool GraphicEngine::initOutputWindow(sf::RenderWindow *window)
     if (!this->deskTexture.loadFromFile("Resources/window/Texture.jpg")){
         std::cout << "Failed to load desk sheet." << std::endl;
     }
+    this->originalWinSize = window->getSize();
 
     this->deskSprite.setTexture(this->deskTexture);
-    this->deskSprite.setPosition(window->getSize().x - 200, 0);
+    this->deskSprite.setPosition(this->originalWinSize.x - 200, 0);
 
 
     return true;
@@ -404,7 +405,7 @@ bool GraphicEngine::ShowEventList(std::vector<std::string> eventVector)
 
     sf::Text tableText;
     tableText.setFont(this->UbuntuMono);
-    tableText.setPosition(sf::Vector2f(this->outputWindow->getSize().x - 195, 100));
+    tableText.setPosition(sf::Vector2f(this->originalWinSize.x - 195, 100));
     tableText.setString(outputStr);
     tableText.setCharacterSize(14);
     tableText.setColor(sf::Color::Yellow);

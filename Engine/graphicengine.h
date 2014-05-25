@@ -91,6 +91,8 @@ private:
     sf::Texture deskTexture;
     sf::Sprite deskSprite;
     std::vector< std::string > eventList;
+
+    sf::Vector2u originalWinSize;
 };
 
 };

@@ -14,7 +14,8 @@ GameField::GameField(QObject* client,bool isSingleGame):client(client),TimeStep(
     int h = this->renderInfo.level.GetHeight();
     int w = this->renderInfo.level.GetWidth();
 
-    this->renderInfo.window = new sf::RenderWindow(sf::VideoMode(w + 200, h), "ROCKET BARRAGE");
+    this->renderInfo.window = new sf::RenderWindow(sf::VideoMode(w + 200, h), "ROCKET BARRAGE", sf::Style::None);
+    this->renderInfo.originalWinSize = this->renderInfo.window->getSize();
 
     std::cout << "window Created" << std::endl;
     this->renderInfo.window->setActive(false);
@@ -43,6 +44,9 @@ GameField::GameField(QObject* client,bool isSingleGame):client(client),TimeStep(
         this->renderInfo.moveToTheVictim->walls = this->getWalls();
     }
     this->renderInfo.simClock.restart();
+
+    this->renderInfo.window->setSize(sf::Vector2u(sf::VideoMode::getDesktopMode().width,
+                                                  sf::VideoMode::getDesktopMode().height));
     std::cout << "init completed!" << std::endl;
 }
 GameField::~GameField()
@@ -190,8 +194,7 @@ bool GameField::MoveThisWorld()
         text.setString("FPS: " + s);
         text.setColor(sf::Color::White);
 
-        sf::Vector2u winSize = this->renderInfo.window->getSize();
-        text.setPosition(sf::Vector2f( winSize.x - 125, 25 ));
+        text.setPosition(sf::Vector2f(this->renderInfo.originalWinSize.x - 150, 25 ));
 
 
         this->renderInfo.window->draw(text);
@@ -265,8 +268,7 @@ bool GameField::MoveThisWorld()
         text.setString("FPS: " + s);
         text.setColor(sf::Color::White);
 
-        sf::Vector2u winSize = this->renderInfo.window->getSize();
-        text.setPosition(sf::Vector2f( winSize.x - 125, 25 ));
+        text.setPosition(sf::Vector2f(this->renderInfo.originalWinSize.x - 150, 25 ));
 
 
         this->renderInfo.window->draw(text);
@@ -305,6 +307,9 @@ bool GameField::CheckEvents()
         if (this->renderInfo.event.key.code == sf::Keyboard::Space){
             this->renderInfo.Switch_Mouse = !this->renderInfo.Switch_Mouse;
             this->renderInfo.mouseObject.type = (this->renderInfo.Switch_Mouse)? rbw::Graphic::MOUSE_POINTER_SWITCHED : rbw::Graphic::MOUSE_POINTER_NORMAL;
+        }
+        if (this->renderInfo.event.key.code == sf::Keyboard::Escape){
+            this->renderInfo.window->close();
         }
     }
 
