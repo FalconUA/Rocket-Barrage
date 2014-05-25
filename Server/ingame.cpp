@@ -17,7 +17,7 @@ InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-
         UserInfo[i]=NULL;
     }
 
-    this->renderInfo.FPS = 60.0f;
+    this->renderInfo.FPS = 80.0f;
     this->renderInfo.level.LoadFromFile("Resources/maps/desert.tmx");
 
     this->renderInfo.world = new rbw::WorldSimulator;
@@ -26,7 +26,7 @@ InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-
     this->renderInfo.moveToTheVictim = new MoveToTheVictim;
     this->renderInfo.botcount = 0;
 
-    this->renderInfo.moveToTheVictim->walls = this->getWalls();
+    this->renderInfo.moveToTheVictim->walls = this->getWalls();    
 }
 InGame::~InGame()
 {
@@ -67,13 +67,28 @@ void InGame::run()
     }
     sendToClient(Text);
 
-    MoveThisWorld();
-    this->renderInfo.world->RoundDraw();
-    msleep(TimeStep);
+    sf::Clock clock;
+    bool timeToSimulate = true;
+    clock.restart();
+
+    this->renderInfo.world->RoundDraw();    
     while(!Timeout)
     {
-        msleep(2*TimeStep-MoveThisWorld());
-        std::cout << "fucking moving" << std::endl;
+        //Wait until 1/60th of a second has passed, then update everything.
+        if (clock.getElapsedTime().asSeconds() >= 1.0f / this->renderInfo.FPS)
+        {
+            timeToSimulate = true; //We're ready to redraw everything
+            clock.restart();
+        }
+        else //Sleep until next 1/60th of a second comes around
+        {
+            sf::Time sleepTime = sf::seconds((1.0f / this->renderInfo.FPS) - clock.getElapsedTime().asSeconds());
+            sf::sleep(sleepTime);
+        }
+
+        if (timeToSimulate)
+            this->MoveThisWorld();
+
         QApplication::processEvents();
     };
     sigEndGame(IndexOfGame);
