@@ -31,8 +31,8 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
     moveToTheVictim->walls = this->getWalls();// ------------it's new //
 
     this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK,false);
-    this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,true);
-    this->server->AddPlayer("Bot1", rbw::TEAM_WHITE,true);
+    this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,false);
+    this->server->AddPlayer("Bot1", rbw::TEAM_WHITE,false);
     return true;
 }
 
@@ -192,7 +192,7 @@ void Game::GenerateNextFrame(){
     std::string s(ss.str());
 
     sf::Font font;
-    font.loadFromFile("Resources/UbuntuMono-R.ttf");
+    font.loadFromFile("Resources/fonts/UbuntuMono-R.ttf");
     sf::Text text;
     text.setFont(font);
     text.setString("FPS: " + s);

@@ -84,7 +84,6 @@ int sgn(float x){
 
 
 
-
 intPolygon::intPolygon(std::vector< sf::Vector2f > point){
     this->Points = point;
     this->Area = 0;
@@ -114,6 +113,9 @@ float intPolygon::GetArea(){
 }
 sf::Vector2f intPolygon::CheckIntersect(sf::Vector2f p0, sf::Vector2f p1){
     sf::Vector2f iP = sf::Vector2f(-1.0f,-1.0f);
+
+    if (p0 == p1) return iP;
+
     float distance = 1000000000.0f;
     for (int i=0; i<this->Points.size(); i++){
         int ind_1 = ((i+0) % this->Points.size());

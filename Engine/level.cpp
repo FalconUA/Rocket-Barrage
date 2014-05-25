@@ -173,6 +173,8 @@ std::cout << "creating vector\n";
 
             while(objectElement != NULL)
             {
+                // Reading information about new object
+                Object object;
                 // Получаем все данные - тип, имя, позиция, etc
                 std::string objectType;
                 if (objectElement->Attribute("type") != NULL)
@@ -187,59 +189,106 @@ std::cout << "creating vector\n";
                 int x = atoi(objectElement->Attribute("x"));
                 int y = atoi(objectElement->Attribute("y"));
 
-                int width, height;
-
-                sf::Sprite sprite;
-                sprite.setTexture(tilesetImage);
-                sprite.setTextureRect(sf::Rect<int>(0,0,0,0));
-                sprite.setPosition(x, y);
-
-                if (objectElement->Attribute("width") != NULL)
+                if (objectType == "rect")
                 {
-                    width = atoi(objectElement->Attribute("width"));
-                    height = atoi(objectElement->Attribute("height"));
-                }
-                else
-                {
-                    width = subRects[atoi(objectElement->Attribute("gid")) - firstTileID].width;
-                    height = subRects[atoi(objectElement->Attribute("gid")) - firstTileID].height;
-                    sprite.setTextureRect(subRects[atoi(objectElement->Attribute("gid")) - firstTileID]);
-                }
+                    int width, height;
 
-                // Экземпляр объекта
-                Object object;
-                object.name = objectName;
-                object.type = objectType;
-                object.sprite = sprite;
+                    sf::Sprite sprite;
+                    sprite.setTexture(tilesetImage);
+                    sprite.setTextureRect(sf::Rect<int>(0,0,0,0));
+                    sprite.setPosition(x, y);
 
-                sf::Rect <int> objectRect;
-                objectRect.top = y;
-                objectRect.left = x;
-                objectRect.height = height;
-                objectRect.width = width;
-                object.rect = objectRect;
-
-                // "Переменные" объекта
-                tinyxml2::XMLElement *properties;
-                properties = objectElement->FirstChildElement("properties");
-                if (properties != NULL)
-                {
-                    tinyxml2::XMLElement *prop;
-                    prop = properties->FirstChildElement("property");
-                    if (prop != NULL)
+                    if (objectElement->Attribute("width") != NULL)
                     {
-                        while(prop != NULL)
+                        width = atoi(objectElement->Attribute("width"));
+                        height = atoi(objectElement->Attribute("height"));
+                    }
+                    else
+                    {
+                        width = subRects[atoi(objectElement->Attribute("gid")) - firstTileID].width;
+                        height = subRects[atoi(objectElement->Attribute("gid")) - firstTileID].height;
+                        sprite.setTextureRect(subRects[atoi(objectElement->Attribute("gid")) - firstTileID]);
+                    }
+
+                    // Экземпляр объекта
+                    object.name = objectName;
+                    object.type = objectType;
+                    object.sprite = sprite;
+
+                    sf::Rect <int> objectRect;
+                    objectRect.top = y;
+                    objectRect.left = x;
+                    objectRect.height = height;
+                    objectRect.width = width;
+                    object.rect = objectRect;
+
+                    // "Переменные" объекта
+                    tinyxml2::XMLElement *properties;
+                    properties = objectElement->FirstChildElement("properties");
+                    if (properties != NULL)
+                    {
+                        tinyxml2::XMLElement *prop;
+                        prop = properties->FirstChildElement("property");
+                        if (prop != NULL)
                         {
-                            std::string propertyName = prop->Attribute("name");
-                            std::string propertyValue = prop->Attribute("value");
+                            while(prop != NULL)
+                            {
+                                std::string propertyName = prop->Attribute("name");
+                                std::string propertyValue = prop->Attribute("value");
 
-                            object.properties[propertyName] = propertyValue;
+                                object.properties[propertyName] = propertyValue;
 
-                            prop = prop->NextSiblingElement("property");
+                                prop = prop->NextSiblingElement("property");
+                            }
                         }
                     }
                 }
+                if (objectType == "polygon")
+                {
+                    // Экземпляр объекта
+                    object.name = objectName;
+                    object.type = objectType;
 
+                    // points of this polygon
+                    tinyxml2::XMLElement *points;
+                    std::string pointArray;
+                    points = objectElement->FirstChildElement("polyline");
+                    if (points != NULL)
+                    {
+                        pointArray = points->Attribute("points");
+                    }
+                    pointArray.replace(pointArray.begin(), pointArray.end(), ',', ' ');
+                    std::stringstream ss(pointArray);
+                    std::string tmpPoint;
+                    while (ss << tmpPoint)
+                    {
+                        int tx;
+                        int ty;
+                        ss << tx << ty;
+                        object.points.push_back(sf::Vector2i(x+tx,y+ty));
+                    }
+
+                    // "Переменные" объекта
+                    tinyxml2::XMLElement *properties;
+                    properties = objectElement->FirstChildElement("properties");
+                    if (properties != NULL)
+                    {
+                        tinyxml2::XMLElement *prop;
+                        prop = properties->FirstChildElement("property");
+                        if (prop != NULL)
+                        {
+                            while(prop != NULL)
+                            {
+                                std::string propertyName = prop->Attribute("name");
+                                std::string propertyValue = prop->Attribute("value");
+
+                                object.properties[propertyName] = propertyValue;
+
+                                prop = prop->NextSiblingElement("property");
+                            }
+                        }
+                    }
+                }
                 // Пихаем объект в вектор
                 objects.push_back(object);
 

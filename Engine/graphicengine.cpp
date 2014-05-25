@@ -346,7 +346,7 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             }
             continue;
         }
-        //DrawGraphicObject(this->outputWindow, tmpObj);
+        DrawGraphicObject(this->outputWindow, tmpObj);
     }
 
     rbw::Graphic::AnimationChainElement * tmpElement = this->Explosions.First;

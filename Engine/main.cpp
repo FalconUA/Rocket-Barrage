@@ -15,7 +15,7 @@ int main(int argc, char * argv[]){
     std::cout << "debug window\n\n";
 
     Level level;
-    level.LoadFromFile("Resources/desert.tmx");
+    level.LoadFromFile("Resources/maps/desert.tmx");
     int h = level.GetHeight();
     int w = level.GetWidth();
 

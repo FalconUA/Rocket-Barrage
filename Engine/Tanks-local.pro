@@ -3,6 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
 
 
 INCLUDEPATH += Tiled/
@@ -42,6 +43,7 @@ HEADERS += \
     graphicengine.h \
     rbwincludes.h \
     ../AI/evadefromtherocket.h \
-    ../AI/movetothevictim.h
+    ../AI/movetothevictim.h \
+    converter.h
 
 OTHER_FILES +=

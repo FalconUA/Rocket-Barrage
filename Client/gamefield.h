@@ -54,6 +54,9 @@ private:
 
     std::string MyName;
 
+    std::vector< rbw::GraphicObject > goVector_from_string(std::string charArray);
+    std::vector< rbw::PlayerExportInformation > peiVector_from_string(std::string charArray);
+
     void AddMoveRequest(sf::Vector2i vector);
     void AddGrenade(sf::Vector2i mousePosition);
     void AddBouncingBomb(sf::Vector2i mousePosition);

@@ -103,6 +103,32 @@ void Player::Move(sf::Vector2i direction)
     new_x = p0.x + p_new.x;
     new_y = p0.y;
     for (int i=0; i< (int)this->worldInfo->wallForPlayer.size(); i++){
+
+        /* Honestly, i have no fucking idea why this fucking algorithm
+         * doesnt work. I mean, rarely we can see some bugs on the corner
+         */
+
+        /*
+        std::vector< sf::Vector2f > points;
+
+        for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
+            points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
+                                          this->worldInfo->wallForPlayer[i].points[k].y));
+        }
+
+        sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+
+        //has collision with i-th rectangle
+        rbw::intPolygon * tmpPolygon;
+        if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+        if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+        else tmpPolygon = new rbw::intPolygon(tmp);
+
+        sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
+        can_move_hor = can_move_hor && (pAns == sf::Vector2f(-1.0f, -1.0f));
+        delete tmpPolygon;
+        */
+
         bool temp;
 
         int y1 = this->worldInfo->wallForPlayer[i].rect.top;
@@ -118,6 +144,31 @@ void Player::Move(sf::Vector2i direction)
     new_x = p0.x;
     new_y = p0.y + p_new.y;
     for (int i=0; i< (int)this->worldInfo->wallForPlayer.size(); i++){
+
+        /* Honestly, i have no fucking idea why this fucking algorithm
+         * doesnt work. I mean, rarely we can see some bugs on the corner
+         */
+
+        /*
+        std::vector< sf::Vector2f > points;
+
+        for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
+            points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
+                                          this->worldInfo->wallForPlayer[i].points[k].y));
+        }
+
+        sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+
+        //has collision with i-th rectangle
+        rbw::intPolygon * tmpPolygon;
+        if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+        if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+        else tmpPolygon = new rbw::intPolygon(tmp);
+
+        sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
+        can_move_ver = can_move_ver && (pAns == sf::Vector2f(-1.0f, -1.0f));
+        delete tmpPolygon;
+        */
         bool temp;
 
         int y1 = this->worldInfo->wallForPlayer[i].rect.top;
@@ -126,7 +177,7 @@ void Player::Move(sf::Vector2i direction)
         int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
 
         temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
-        can_move_ver = can_move_ver && temp;
+        can_move_ver = can_move_ver && temp;          
     }
 
     if (!(can_move_hor || can_move_ver)) return ;
@@ -308,12 +359,24 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
     sf::Vector2f pAns = sf::Vector2f(-1.0f,-1.0f);
 
     for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
-        sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
-        //has collision with i-th rectangle
-        rbw::intPolygon tmpPolygon(tmp);        
+        std::vector< sf::Vector2f > points;
 
-        pAns = tmpPolygon.CheckIntersect(this->position,
+        for (int k=0; k<(int) this->worldInfo->wallForRocket[i].points.size(); k++){
+            points.push_back(sf::Vector2f(this->worldInfo->wallForRocket[i].points[k].x,
+                                          this->worldInfo->wallForRocket[i].points[k].y));
+        }
+
+        sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
+
+        //has collision with i-th rectangle
+        rbw::intPolygon * tmpPolygon;
+        if (this->worldInfo->wallForRocket[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+        if (this->worldInfo->wallForRocket[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+        else tmpPolygon = new rbw::intPolygon(tmp);
+
+        pAns = tmpPolygon->CheckIntersect(this->position,
                                          sf::Vector2f(this->position.x + this->speed.x, this->position.y + this->speed.y));
+        delete tmpPolygon;
         if (pAns != sf::Vector2f(-1.0f, -1.0f))
             return pAns;
     }
@@ -438,11 +501,24 @@ sf::Vector2f BouncingBomb::getExplosionPoint(Player **victim)
     }
 
     for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
+        std::vector< sf::Vector2f > points;
+
+        for (int k=0; k<(int) this->worldInfo->wallForRocket[i].points.size(); k++){
+            points.push_back(sf::Vector2f(this->worldInfo->wallForRocket[i].points[k].x,
+                                          this->worldInfo->wallForRocket[i].points[k].y));
+        }
+
         sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
+
         //has collision with i-th rectangle
-        rbw::intPolygon tmpPolygon(tmp);
-        pAns = tmpPolygon.CheckIntersect(this->position, sf::Vector2f(this->position.x + this->speed.x,
+        rbw::intPolygon * tmpPolygon;
+        if (this->worldInfo->wallForRocket[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+        if (this->worldInfo->wallForRocket[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+        else tmpPolygon = new rbw::intPolygon(tmp);
+
+        pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(this->position.x + this->speed.x,
                                                                       this->position.y + this->speed.y));
+        delete tmpPolygon;
         if (pAns != sf::Vector2f(-1, -1))
             return pAns;
     }

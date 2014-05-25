@@ -130,6 +130,40 @@ QTcpSocket* InGame::TakeSocket(int Index)
 {
     return UserInfo[Index]->qtcpSocket;
 }
+std::string goVector_to_string(std::vector< rbw::GraphicObject > * objects)
+{
+    std::stringstream buffer;
+    buffer << objects->size() << std::endl;
+    for (int i=0; i<objects->size(); i++){
+        buffer << (objects->at(i)).x << " ";
+        buffer << (objects->at(i)).y << " ";
+        buffer << (objects->at(i)).velocity_x << " ";
+        buffer << (objects->at(i)).velocity_y << " ";
+        buffer << (int) (objects->at(i)).type << " ";
+        buffer << (objects->at(i)).Name << " ";
+        buffer << (int) (objects->at(i)).team << " ";
+        buffer << (objects->at(i)).HealthPoint << " ";
+        buffer << (objects->at(i)).zoom_coefficient << std::endl;
+    }
+    return buffer.str();
+}
+std::string peiVector_to_string(std::vector< rbw::PlayerExportInformation > * peInfo)
+{
+    std::stringstream buffer;
+    buffer << peInfo->size() << std::endl;
+    for (int i=0; i<peInfo->size(); i++){
+        buffer << (peInfo->at(i)).PlayerName << " ";
+        buffer << (int) (peInfo->at(i)).team << " ";
+        buffer << (peInfo->at(i)).Kill << " ";
+        buffer << (peInfo->at(i)).Death << " ";
+        buffer << (peInfo->at(i)).DamageDealt << " ";
+        buffer << (peInfo->at(i)).HomingMissilesLeft << " ";
+        buffer << (peInfo->at(i)).BouncingBombsLeft << " ";
+        buffer << (peInfo->at(i)).GrenadesLeft << " ";
+        buffer << (peInfo->at(i)).isDead << std::endl;
+    }
+    return buffer.str();
+}
 
 //====================Move=this=world========================================
 float InGame::MoveThisWorld()//QTimerEvent* event,TimerEvent,MoveThisWorld ((^.^)>)>)>)>>
@@ -259,7 +293,6 @@ void InGame::sendToClient(const std::vector< std::string >  stVetor,int Index)
             QApplication::postEvent(server,pe);
         }
     }
-
 }
 void InGame::sendToClient(const std::vector< rbw::PlayerExportInformation >  peiVector,int Index)
 {

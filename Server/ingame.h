@@ -46,6 +46,9 @@ private:
     RenderInformation renderInfo;
     std::vector<TRectangle> getWalls();
 
+    std::string goVector_to_string(std::vector< rbw::GraphicObject > * objects);
+    std::string peiVector_to_string(std::vector< rbw::PlayerExportInformation > * peInfo);
+
     QRegExp qre;
     int maxIndex;
     int Round = 0;

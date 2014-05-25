@@ -6,7 +6,7 @@
 GameField::GameField(QObject* client,bool isSingleGame):client(client),TimeStep(0.5*1000),isSingleGame(isSingleGame)
 {
     this->renderInfo.isSinglePlayer = isSingleGame;
-    this->renderInfo.FPS = 60.0f;
+    this->renderInfo.FPS = 70.0f;
 
     std::cout << "debug window\n\n";
 
@@ -68,7 +68,57 @@ std::vector<TRectangle> GameField::getWalls()
     return my_walls;
 }
 
+std::vector< rbw::GraphicObject > goVector_from_string(std::string charArray)
+{
+    std::vector< rbw::GraphicObject > result;
+    std::stringstream buffer(charArray);
+    int count;
+    buffer >> count;
+    for (int i=0; i<count; i++){
+        rbw::GraphicObject newGraphicObject;
 
+        int tmp;
+        buffer >> newGraphicObject.x;
+        buffer >> newGraphicObject.y;
+        buffer >> newGraphicObject.velocity_x;
+        buffer >> newGraphicObject.velocity_y;
+        buffer >> tmp;
+            newGraphicObject.type = (rbw::Graphic::GraphicObjectType) tmp;
+        buffer >> newGraphicObject.Name;
+        buffer >> tmp;
+            newGraphicObject.team = (rbw::Team) tmp;
+        buffer >> newGraphicObject.HealthPoint;
+        buffer >> newGraphicObject.zoom_coefficient;
+
+        result.push_back(newGraphicObject);
+    }
+    return result;
+}
+std::vector< rbw::PlayerExportInformation > peiVector_from_string(std::string charArray)
+{
+    std::vector< rbw::PlayerExportInformation > result;
+    std::stringstream buffer(charArray);
+    int count;
+    buffer >> count;
+    for (int i=0; i<count; i++){
+        rbw::PlayerExportInformation newPei;
+
+        int tmp;
+        buffer >> newPei.PlayerName;
+        buffer >> tmp;
+            newPei.team = (rbw::Team) tmp;
+        buffer >> newPei.Kill;
+        buffer >> newPei.Death;
+        buffer >> newPei.DamageDealt;
+        buffer >> newPei.HomingMissilesLeft;
+        buffer >> newPei.BouncingBombsLeft;
+        buffer >> newPei.GrenadesLeft;
+        buffer >> newPei.isDead;
+
+        result.push_back(newPei);
+    }
+    return result;
+}
 
 void GameField::run()
 {        

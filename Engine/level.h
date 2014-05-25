@@ -2,6 +2,7 @@
 #define LAYER_H
 
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 #include <SFML/Graphics.hpp>
@@ -14,6 +15,8 @@ struct Object
 
     std::string name;
     std::string type;
+
+    std::vector< sf::Vector2i > points;
     sf::Rect< int > rect;
     std::map< std::string, std::string > properties;
 
