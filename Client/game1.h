@@ -25,6 +25,7 @@ enum State{Registration,Menu,SearchGame,inLobbySearch,inLobby,inGame};
 class GameField;
 class MyWidget;
 struct UsersinLobby;
+
 class Client : public QWidget
 {
     Q_OBJECT
@@ -123,6 +124,7 @@ private:
     State state=Registration;
     bool pause;
     bool isSingleGame;
+    bool Balance=1;
 public:
     Client(/*const QString& strHost,*/ int nPort, QWidget *pwgt = 0);
     ~Client();

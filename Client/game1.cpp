@@ -3,9 +3,9 @@ Client::Client(int nPort, QWidget *pwgt) : QWidget(pwgt),
     strHost("localhost"),nPort(nPort)
                     , m_nNextBlockSize(0),qre("Start Game:"),
                     qpBomb("Resources/window/black-bomb-hi.png"),
-                    qpMap2("Resources/window/old-world-map.jpg"),
-                    qpRocket("Resources/window/Rocket.png"),
                     qpMap("Resources/window/old-world-map.jpg"),
+                    qpRocket("Resources/window/Rocket.png"),
+                    qpMap2("Resources/window/old-world-map.jpg"),
                     qsLobbyBlackTeam("<span style=color:#000000><H1>BLACK Team</H1></span style>"),
                     qreUserName("[a-zA-z]{4,16}$"),
                     qsLobbyWhiteTeam("<span style=color:#FFFFFF><H1>WHITE Team</H1></span style>"),
@@ -296,15 +296,17 @@ void Client::slotReadyRead()
         {
             break;
         }
+
         quint8 a;
-        in >>a;
+        in >>a;qDebug()<<"a:"<<a;
+
         switch (a)
         {
-            case 0:
+            case quint8(0):
             {
                 QString str;
                 in>>str;
-                qDebug()<<str;
+                //qDebug()<<str;
                 switch(state)
                 {
                     case Registration:
@@ -582,28 +584,92 @@ void Client::slotReadyRead()
             }//case 0 :)
             default:
             {
-                QByteArray qba;
-                in>>qba;
                 QSendToClientEvent* pe=new QSendToClientEvent();
                 pe->forSwitch=a;
+                int length;
+                in>>length;qDebug()<<"lenght:"<<length;
                 switch(a)
                 {
-                    case 1:
+                    case quint8(1):
                     {
-                        pe->stVector=(std::vector< std::string >)*qba.data();
+                        QVector<std::string> qvector ;
+                        QString string;
+                        for(int i=0;i<length;i++)
+                        {
+                            in>>string;
+                            qDebug()<<"string:"<<string;
+                            qvector<<string.toStdString();
+                        }
+                        pe->stVector=qvector.toStdVector();
+                        break;
                     }
-                    case 2:
+                    case quint8(2):
                     {
-                        pe->peiVector=(std::vector< rbw::PlayerExportInformation >)*qba.data();
+                        QVector<rbw::PlayerExportInformation> qvector ;
+                        rbw::PlayerExportInformation playerEI;
+
+                        QString PlayerName;
+                        int Kill;
+                        int Death;
+                        int DamageDealt;
+                        int HomingMissilesLeft;
+                        int BouncingBombsLeft;
+                        int GrenadesLeft;
+                        bool isDead;
+
+                        for(int i=0;i<length;i++)
+                        {
+                            in>>PlayerName>>Kill>>Death>>DamageDealt
+                              >>HomingMissilesLeft>>BouncingBombsLeft>>GrenadesLeft>>isDead;
+                            playerEI.PlayerName=PlayerName.toStdString();
+                            playerEI.Kill=Kill;
+                            playerEI.Death=Death;
+                            playerEI.DamageDealt=DamageDealt;
+                            playerEI.HomingMissilesLeft=HomingMissilesLeft;
+                            playerEI.BouncingBombsLeft=BouncingBombsLeft;
+                            playerEI.GrenadesLeft=GrenadesLeft;
+                            playerEI.isDead;
+                            qvector<<playerEI;
+                        }
+                        pe->peiVector=qvector.toStdVector();
+                        break;
                     }
-                    case 3:
+                    case quint8(3):
                     {
-                        pe->goVector=(std::vector< rbw::GraphicObject > )*qba.data();
+                        QVector<rbw::GraphicObject> qvector ;
+                        rbw::GraphicObject Object;
+
+                        int x;
+                        int y;
+                        float velocity_x;
+                        float velocity_y;
+                        int type;
+                        QString Name;
+                        int team;
+                        int HealthPoint;
+                        float zoom_coefficient;
+
+                        for(int i=0;i<length;i++)
+                        {
+                            in>>x>>y>>velocity_x>>velocity_y>>type>>Name>>team>>HealthPoint>>zoom_coefficient;
+                            Object.x=x;
+                            Object.y=y;
+                            Object.velocity_x=velocity_x;
+                            Object.velocity_y=velocity_y;
+                            Object.type=static_cast<rbw::Graphic::GraphicObjectType>(type); //qDebug()<<"type:"<<Object.type;
+                            Object.Name=Name.toStdString();
+                            Object.team=static_cast<rbw::Team>(team); //qDebug()<<"team:"<<Object.team;
+                            Object.HealthPoint=HealthPoint;
+                            Object.zoom_coefficient=zoom_coefficient;
+                            qvector<<Object;
+                        }
+                        pe->goVector=qvector.toStdVector();
+                        break;
                     }
-                    if(gamefield!=NULL)
-                    {
-                        QApplication::postEvent(gamefield,pe);
-                    }
+                };
+                if(gamefield != NULL)
+                {
+                    QApplication::postEvent(gamefield,pe);
                 }
                 break;
             }//defailt;
@@ -759,7 +825,7 @@ void Client::Register(QString UserName )
              qpbinLobbySend->hide();
              qteinLobbyChat->hide();
              qleinLobbyChat->hide();
-             if(numberOfBotBlackTeam+qvstr_inLobbyBlackTeam.size()!=numberOfBotWhiteTeam+qvstr_inLobbyWhiteTeam.size())
+             if(0/*numberOfBotBlackTeam+qvstr_inLobbyBlackTeam.length()!=numberOfBotWhiteTeam+qvstr_inLobbyWhiteTeam.length()*/)
              {
                  qpbinLobbyStart->setEnabled(0);
              }
@@ -862,6 +928,10 @@ void Client::slotSigleGame()
     qwinLobby->show();
     qvstr_inLobbyBlackTeam<<UserName;
     RefreshList();
+    if(Balance)
+    {
+        qpbinLobbyStart->setEnabled(0);
+    }
     ShowButton(4);
 }
 
@@ -958,14 +1028,15 @@ void Client::slotLobbyCreate()
 }
 void Client::slotLobbyBack()
 {
-    show();
     if(isSingleGame)
     {
-        ShowButton(3);
         qwinLobby->hide();
+        show();
+        ShowButton(3);
     }
     else
     {
+        show();
         ShowButton(1);
         qwLobbySearch->hide();
         if(state==inLobby)
@@ -1000,14 +1071,16 @@ void Client::slotinLobbyAddBotBlack()
         if(isSingleGame)
         {
             numberOfBotBlackTeam++;
-            if(numberOfBotBlackTeam+1==numberOfBotWhiteTeam)
+            if((numberOfBotBlackTeam+1==numberOfBotWhiteTeam)+!Balance)
             {
                 qpbinLobbyStart->setEnabled(1);
             }
             else qpbinLobbyStart->setEnabled(0);
         }
         else
-        SendToServer("add black bot");
+        {
+            SendToServer("add black bot");
+        }
     }
     else
     {
@@ -1023,14 +1096,16 @@ void Client::slotinLobbyAddBotWhite()
         if(isSingleGame)
         {
             numberOfBotWhiteTeam++;
-            if(numberOfBotBlackTeam+1==numberOfBotWhiteTeam)
+            if((numberOfBotBlackTeam+1==numberOfBotWhiteTeam)+!Balance)
             {
                 qpbinLobbyStart->setEnabled(1);
             }
             else qpbinLobbyStart->setEnabled(0);
         }
         else
-        SendToServer("add white bot");
+        {
+            SendToServer("add white bot");
+        }
     }
     else
     {
@@ -1046,14 +1121,16 @@ void Client::slotinLobbyRemoveWhite()
         if(isSingleGame)
         {
             numberOfBotWhiteTeam--;
-            if(numberOfBotBlackTeam+1==numberOfBotWhiteTeam)
+            if((numberOfBotBlackTeam+1==numberOfBotWhiteTeam)+!Balance)
             {
                 qpbinLobbyStart->setEnabled(1);
             }
             else qpbinLobbyStart->setEnabled(0);
         }
         else
-        SendToServer("remove white bot");
+        {
+            SendToServer("remove white bot");
+        }
     }
     else
     {
@@ -1069,14 +1146,16 @@ void Client::slotinLobbyRemoveBlack()
         if(isSingleGame)
         {
             numberOfBotBlackTeam--;
-            if(numberOfBotBlackTeam+1==numberOfBotWhiteTeam)
+            if((numberOfBotBlackTeam+1==numberOfBotWhiteTeam)+!Balance)
             {
                 qpbinLobbyStart->setEnabled(1);
             }
             else qpbinLobbyStart->setEnabled(0);
         }
         else
-        SendToServer("remove black bot");
+        {
+            SendToServer("remove black bot");
+        }
     }
     else
     {
@@ -1101,9 +1180,12 @@ void Client::CreateGameField(QString UsersName)
     connect(this,SIGNAL(sig_PauseGame(bool)),
             gamefield,SLOT(slotPause(bool)));
     QStringList stlist=UsersName.split(" ");
-    while(stlist.size()>0)
+    QString User;
+    while(stlist.length()>0)
     {
-        gamefield->AddUser(stlist.takeFirst().toStdString());
+        User=stlist.takeFirst();
+        if(User!="")
+        gamefield->AddUser(User.toStdString());
     }
     gamefield->addBot(numberOfBotBlackTeam,numberOfBotWhiteTeam);
     gamefield->start();

@@ -9,7 +9,11 @@
 
 //=================Begin=Or=End=?========================================
 InGame::InGame(QObject *server,int Index):server(server),/*Text(""),*/maxIndex(-1),IndexOfGame(Index),
-    TimeStep(0.5*1000),QThread(0),qre("(G|(?:BB)|(?:HM)|(?:AMR)):([0-9]+) ([0-9]+)")//,timer(this)([0-9]+) (0-9+)
+    TimeStep(0.5*1000),QThread(0),qre("(G|(?:BB)|(?:HM)|(?:AMR)):(\\-{0,1}[0-9]+) (\\-{0,1}[0-9]+)")
+
+    //qre("(G|(?:BB)|(?:HM)|(?:AMR)):(([\\-0-9]+) ([\\-0-9]+)")
+    //qre("(G|(?:BB)|(?:HM)|(?:AMR)):([0-9]+) ([0-9]+)")
+    //,timer(this)([0-9]+) (0-9+)
 {
 
     for(int i=0;i<=N-1;i++)
@@ -71,9 +75,10 @@ void InGame::run()
     bool timeToSimulate = true;
     clock.restart();
 
-    this->renderInfo.world->RoundDraw();    
     while(!Timeout)
     {
+        timeToSimulate = false;
+
         //Wait until 1/60th of a second has passed, then update everything.
         if (clock.getElapsedTime().asSeconds() >= 1.0f / this->renderInfo.FPS)
         {
@@ -85,6 +90,8 @@ void InGame::run()
             sf::Time sleepTime = sf::seconds((1.0f / this->renderInfo.FPS) - clock.getElapsedTime().asSeconds());
             sf::sleep(sleepTime);
         }
+
+        //sf::sleep(sf::milliseconds(16));
 
         if (timeToSimulate)
             this->MoveThisWorld();
@@ -226,6 +233,7 @@ float InGame::MoveThisWorld()//QTimerEvent* event,TimerEvent,MoveThisWorld ((^.^
     sendToClient(this->renderInfo.world->ExportEvents());
     sendToClient(this->renderInfo.world->ExportPlayerInfo());
     sendToClient(*objects);
+
 
     std::cout << objects->size() << std::endl;
     delete objects;
@@ -405,6 +413,8 @@ void InGame::ReadyRead(int UserIndex, QString str)
         if(qre.cap(1)=="AMR")
         {
             this->renderInfo.world->AddMoveRequest(UserInfo[UserIndex]->UserName.toStdString(),vector);
+            qDebug() << "AMR real vector: " << vector.x << vector.y;
+            return;
         }
         if(qre.cap(1)=="BB")
         {
