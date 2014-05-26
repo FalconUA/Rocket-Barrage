@@ -380,16 +380,14 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
             if (tmpPlayer == this->owner){
                 isCollidingWithOwner = true;
                 if (this->firstCollideWithOwner) continue;
-            }
-            else{
-                *victim = tmpPlayer;
-                std::cout << "victim: " << (*victim)->GetPlayerName() << std::endl;
-                return this->position;
-            }
-        }
-        if (!isCollidingWithOwner)
-            this->firstCollideWithOwner = false;
+            }          
+            *victim = tmpPlayer;
+            std::cout << "victim: " << (*victim)->GetPlayerName() << std::endl;
+            return this->position;
+        }        
     }
+    if (!isCollidingWithOwner)
+        this->firstCollideWithOwner = false;
 
     sf::Vector2f pAns = sf::Vector2f(-1.0f,-1.0f);
 
@@ -508,6 +506,7 @@ void BouncingBomb::SimulateNextStep()
 }
 sf::Vector2f BouncingBomb::getCollisionWithPlayers(Player **victim)
 {
+    std::cout << ((this->firstCollideWithOwner)? "TRUE":"FALSE") << std::endl;
     *victim = NULL;    
     bool isCollidingWithOwner = false;
     for (int i=0; i< (int)this->worldInfo->Players.size(); i++){
@@ -516,21 +515,19 @@ sf::Vector2f BouncingBomb::getCollisionWithPlayers(Player **victim)
         sf::Vector2f dv( tmpPlayer->GetPosition().x - this->position.x,
                          tmpPlayer->GetPosition().y - this->position.y );
         float distance = dv.x*dv.x + dv.y*dv.y;
-        float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::BOUNCING_BOMB_HITBOX_RADIUS;
+        float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::BOUNCING_BOMB_HITBOX_RADIUS;        
         if (distance < minDistance*minDistance){
-            //isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));
-            //std::cout << this->owner->GetPlayerName() << ": " << this->firstCollideWithOwner << std::endl;
+            //isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));            
             if (tmpPlayer == this->owner){
                 isCollidingWithOwner = true;
                 if (this->firstCollideWithOwner) continue;
             }
-            else{
-                *victim = tmpPlayer;
-                return this->position;
-            }
-        }
-        if (!isCollidingWithOwner) this->firstCollideWithOwner = false;
+
+            *victim = tmpPlayer;
+            return this->position;
+        }        
     }
+    if (!isCollidingWithOwner) this->firstCollideWithOwner = false;
     return sf::Vector2f(-1,-1);
 }
 sf::Vector2f BouncingBomb::getExplosionPoint(Player **victim)
