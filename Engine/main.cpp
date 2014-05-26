@@ -15,14 +15,14 @@ int main(int argc, char * argv[]){
     std::cout << "debug window\n\n";
 
     Level level;
-    level.LoadFromFile("Resources/maps/desert.tmx");
+    level.LoadFromFile("Resources/maps/street_new.tmx");
     int h = level.GetHeight();
     int w = level.GetWidth();
 
     sf::VideoMode newmode = sf::VideoMode::getDesktopMode();
 
 
-    sf::RenderWindow window(sf::VideoMode(w + 200, h+10), "ROCKET BARRAGE",  sf::Style::None);
+    sf::RenderWindow window(sf::VideoMode(w + 200, h+25), "ROCKET BARRAGE",  sf::Style::Default);
     //window.setMouseCursorVisible(false);
 
     window.setVerticalSyncEnabled(true); // call it once, after creating the window
@@ -36,7 +36,7 @@ int main(int argc, char * argv[]){
     Game NewGame("FalconRT");
     NewGame.Init(&server, &window, &level);    
 
-    window.setSize(sf::Vector2u(newmode.width, newmode.height));
+    //window.setSize(sf::Vector2u(newmode.width, newmode.height));
 
     sf::Clock clock;       
 

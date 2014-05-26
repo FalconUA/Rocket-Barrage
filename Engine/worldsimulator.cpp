@@ -112,36 +112,38 @@ void Player::Move(sf::Vector2i direction)
          * doesnt work. I mean, rarely we can see some bugs on the corner
          */
 
-        /*
-        std::vector< sf::Vector2f > points;
+        if (this->worldInfo->wallForPlayer[i].points.size() != 4){
+            std::vector< sf::Vector2f > points;
 
-        for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
-            points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
-                                          this->worldInfo->wallForPlayer[i].points[k].y));
+            for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
+                points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
+                                              this->worldInfo->wallForPlayer[i].points[k].y));
+            }
+
+            sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+
+            //has collision with i-th rectangle
+            rbw::intPolygon * tmpPolygon;
+            if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+            if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+            else tmpPolygon = new rbw::intPolygon(tmp);
+
+            sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
+            can_move_hor = can_move_hor && (pAns == sf::Vector2f(-1.0f, -1.0f));
+            delete tmpPolygon;
         }
+        else
+        {
+            bool temp;
 
-        sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+            int y1 = this->worldInfo->wallForPlayer[i].rect.top;
+            int x1 = this->worldInfo->wallForPlayer[i].rect.left;
+            int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
+            int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
 
-        //has collision with i-th rectangle
-        rbw::intPolygon * tmpPolygon;
-        if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
-        if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
-        else tmpPolygon = new rbw::intPolygon(tmp);
-
-        sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
-        can_move_hor = can_move_hor && (pAns == sf::Vector2f(-1.0f, -1.0f));
-        delete tmpPolygon;
-        */
-
-        bool temp;
-
-        int y1 = this->worldInfo->wallForPlayer[i].rect.top;
-        int x1 = this->worldInfo->wallForPlayer[i].rect.left;
-        int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
-        int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
-
-        temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
-        can_move_hor = can_move_hor && temp;
+            temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+            can_move_hor = can_move_hor && temp;
+        }
     }
 
     bool can_move_ver = true;
@@ -153,35 +155,38 @@ void Player::Move(sf::Vector2i direction)
          * doesnt work. I mean, rarely we can see some bugs on the corner
          */
 
-        /*
-        std::vector< sf::Vector2f > points;
+        if (this->worldInfo->wallForPlayer[i].points.size() != 4){
+            std::vector< sf::Vector2f > points;
 
-        for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
-            points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
-                                          this->worldInfo->wallForPlayer[i].points[k].y));
+            for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
+                points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
+                                              this->worldInfo->wallForPlayer[i].points[k].y));
+            }
+
+            sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+
+            //has collision with i-th rectangle
+            rbw::intPolygon * tmpPolygon;
+            if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+            if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+            else tmpPolygon = new rbw::intPolygon(tmp);
+
+            sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
+            can_move_ver = can_move_ver && (pAns == sf::Vector2f(-1.0f, -1.0f));
+            delete tmpPolygon;
         }
+        else
+        {
+            bool temp;
 
-        sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+            int y1 = this->worldInfo->wallForPlayer[i].rect.top;
+            int x1 = this->worldInfo->wallForPlayer[i].rect.left;
+            int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
+            int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
 
-        //has collision with i-th rectangle
-        rbw::intPolygon * tmpPolygon;
-        if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
-        if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
-        else tmpPolygon = new rbw::intPolygon(tmp);
-
-        sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
-        can_move_ver = can_move_ver && (pAns == sf::Vector2f(-1.0f, -1.0f));
-        delete tmpPolygon;
-        */
-        bool temp;
-
-        int y1 = this->worldInfo->wallForPlayer[i].rect.top;
-        int x1 = this->worldInfo->wallForPlayer[i].rect.left;
-        int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
-        int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
-
-        temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
-        can_move_ver = can_move_ver && temp;          
+            temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+            can_move_ver = can_move_ver && temp;
+        }
     }
 
     if (!(can_move_hor || can_move_ver)) return ;
@@ -355,7 +360,7 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
         float distance = vec_a.x * vec_a.x + vec_a.y * vec_a.y;
         float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::HOMING_MISSILE_HITBOX_RADIUS;
         if (distance < minDistance * minDistance){
-            isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer = this->owner));
+            isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));
             if (tmpPlayer == this->owner){
                 if (this->firstCollideWithOwner) continue;
             }
@@ -548,10 +553,22 @@ sf::Vector2f BouncingBomb::getReflexVector()
     sf::Vector2f pAns = sf::Vector2f(-1.0f,-1.0f);
 
     for (int i=0; i< (int)this->worldInfo->wallForRocket.size(); i++){
+        std::vector< sf::Vector2f > points;
+
+        for (int k=0; k<(int) this->worldInfo->wallForRocket[i].points.size(); k++){
+            points.push_back(sf::Vector2f(this->worldInfo->wallForRocket[i].points[k].x,
+                                          this->worldInfo->wallForRocket[i].points[k].y));
+        }
+
         sf::Rect< int > tmp = this->worldInfo->wallForRocket[i].rect;
+
         //has collision with i-th rectangle
-        rbw::intPolygon tmpPolygon(tmp);
-        sf::Vector2f tmpAns = tmpPolygon.ReflexSpeed(this->position, &(this->speed));
+        rbw::intPolygon * tmpPolygon;
+        if (this->worldInfo->wallForRocket[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+        if (this->worldInfo->wallForRocket[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+        else tmpPolygon = new rbw::intPolygon(tmp);
+
+        sf::Vector2f tmpAns = tmpPolygon->ReflexSpeed(this->position, &(this->speed));
         if (tmpAns != sf::Vector2f(-1.0f,-1.0f)){
             pAns = tmpAns;
         }

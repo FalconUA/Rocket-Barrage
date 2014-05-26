@@ -151,6 +151,8 @@ sf::Vector2f intPolygon::ReflexSpeed(sf::Vector2f p0, sf::Vector2f *speedvec){
     sf::Vector2f p1 = sf::Vector2f(-1.0f,-1.0f);
     sf::Vector2f p2 = sf::Vector2f(-1.0f,-1.0f);
 
+    if (this->Points.size() != 4)
+        std::cout << "this is A FUCKING POLYGON" << std::endl;
     for (int i=0; i<this->Points.size(); i++){
         int ind_1 = ((i+0) % this->Points.size());
         int ind_2 = ((i+1) % this->Points.size());

@@ -189,6 +189,7 @@ std::cout << "creating vector\n";
                 int x = atoi(objectElement->Attribute("x"));
                 int y = atoi(objectElement->Attribute("y"));
 
+                std::cout << "joining new object: " << x << " " << y << " " << objectName << " " << objectType << std::endl;
                 if (objectType == "rect")
                 {
                     int width, height;
@@ -252,21 +253,33 @@ std::cout << "creating vector\n";
                     // points of this polygon
                     tinyxml2::XMLElement *points;
                     std::string pointArray;
-                    points = objectElement->FirstChildElement("polyline");
+                    points = objectElement->FirstChildElement("polygon");
                     if (points != NULL)
                     {
                         pointArray = points->Attribute("points");
                     }
-                    pointArray.replace(pointArray.begin(), pointArray.end(), ',', ' ');
-                    std::stringstream ss(pointArray);
-                    std::string tmpPoint;
-                    while (ss << tmpPoint)
+                    std::cout << "points: " << pointArray << std::endl;
+                    for (int h=0; h<pointArray.length(); h++)
+                        if (pointArray[h] == ',')
+                            pointArray[h] = ' ';
+                    std::cout << pointArray << std::endl;
+                    std::stringstream ss(pointArray);                                        
+
+                    do
                     {
-                        int tx;
-                        int ty;
-                        ss << tx << ty;
-                        object.points.push_back(sf::Vector2i(x+tx,y+ty));
+                        // read as many numbers as possible.
+                        for (int tx, ty; ss >> tx >> ty;) {
+                            object.points.push_back(sf::Vector2i(x+tx,y+ty));
+                        }
+                        // consume and discard token from stream.
+                        if (ss.fail())
+                        {
+                            ss.clear();
+                            std::string token;
+                            ss >> token;
+                        }
                     }
+                    while (!ss.eof());
 
                     // "Переменные" объекта
                     tinyxml2::XMLElement *properties;
@@ -288,9 +301,11 @@ std::cout << "creating vector\n";
                             }
                         }
                     }
+                    std::cout << ": polygonial wall loaded!"  << std::endl;
                 }
                 // Пихаем объект в вектор
                 objects.push_back(object);
+                std::cout << "object survived!" << std::endl;
 
                 objectElement = objectElement->NextSiblingElement("object");
             }

@@ -31,10 +31,11 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
     moveToTheVictim->walls = this->getWalls();// ------------it's new //
 
     this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK,false);
-    //this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,false);
+    this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,false);
     //this->server->AddPlayer("Bot1", rbw::TEAM_WHITE,false);
 
     this->winSize = this->window->getSize();
+    std::cout << "init completed!" << std::endl;
     return true;
 }
 
