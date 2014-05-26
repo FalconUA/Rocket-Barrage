@@ -56,7 +56,7 @@ GameField::~GameField()
 
 std::vector<TRectangle> GameField::getWalls()
 {
-    std::vector< Object > walls = this->renderInfo.world->getWorldInfo()->wallForPlayer;
+    std::vector< Object > walls = this->renderInfo.world->getWorldInfo()->wallForBots;
     Object wall;
     std::vector<TRectangle> my_walls;
     TRectangle my_wall;

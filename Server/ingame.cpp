@@ -44,7 +44,7 @@ InGame::~InGame()
 }
 std::vector<TRectangle> InGame::getWalls()
 {
-    std::vector< Object > walls = this->renderInfo.world->getWorldInfo()->wallForPlayer;
+    std::vector< Object > walls = this->renderInfo.world->getWorldInfo()->wallForBots;
     Object wall;
     std::vector<TRectangle> my_walls;
     TRectangle my_wall;

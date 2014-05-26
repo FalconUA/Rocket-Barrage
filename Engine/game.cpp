@@ -30,8 +30,8 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
 
     moveToTheVictim->walls = this->getWalls();// ------------it's new //
 
-    this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK,false);
     this->server->AddPlayer("Bot0", rbw::TEAM_WHITE,false);
+    this->server->AddPlayer(this->MyName, rbw::TEAM_BLACK,false);
     //this->server->AddPlayer("Bot1", rbw::TEAM_WHITE,false);
 
     this->winSize = this->window->getSize();
@@ -42,7 +42,7 @@ bool Game::Init(WorldSimulator * server, sf::RenderWindow *window, Level * level
 //---------------------------------------it's new-----------------------------------//
 std::vector<TRectangle> Game::getWalls()
 {
-    std::vector< Object > walls = this->server->getWorldInfo()->wallForPlayer;
+    std::vector< Object > walls = this->server->getWorldInfo()->wallForBots;
     Object wall;
     std::vector<TRectangle> my_walls;
     TRectangle my_wall;
@@ -103,9 +103,11 @@ void Game::RespondToEvent(sf::Event *event){
         }
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
             // left mouse clicked
-            std::cout << "right mousepressed "<<mouse_pos.x<<" "<<mouse_pos.y<<std::endl;
+            std::cout << "left mousepressed "<<mouse_pos.x<<" "<<mouse_pos.y<<std::endl;
             if (!this->Switch_mouse)
                 this->server->AddHomingMissile(this->MyName, sf::Vector2i(mouse_pos.x, mouse_pos.y));
+                //this->server->AddBouncingBomb("bot0", sf::Vector2i(mouse_pos.x, mouse_pos.y));
+
             else
             {
                 this->server->AddGrenade(this->MyName, sf::Vector2i(mouse_pos.x, mouse_pos.y));

@@ -99,93 +99,110 @@ void Player::Move(sf::Vector2i direction)
     this->speed = sf::Vector2f(p_new.x , p_new.y);
 
     sf::Vector2f p0 = this->position;
+    bool can_move_ver = true;
+    bool can_move_hor = true;
 
     float new_x;// = p0.x + p_new.x;
     float new_y;// = p0.y + p_new.y;
 
-    bool can_move_hor = true;
-    new_x = p0.x + p_new.x;
-    new_y = p0.y;
-    for (int i=0; i< (int)this->worldInfo->wallForPlayer.size(); i++){
+    if (this->BOT == false){
+        for (int i=0; i<(int) this->worldInfo->wallForPlayer.size(); i++){
+            if (this->worldInfo->wallForPlayer[i].type == "rect"){
+                {
+                    new_x = p0.x + p_new.x;
+                    new_y = p0.y;
 
-        /* Honestly, i have no fucking idea why this fucking algorithm
-         * doesnt work. I mean, rarely we can see some bugs on the corner
-         */
+                    bool temp;
 
-        if (this->worldInfo->wallForPlayer[i].points.size() != 4){
-            std::vector< sf::Vector2f > points;
+                    int y1 = this->worldInfo->wallForPlayer[i].rect.top;
+                    int x1 = this->worldInfo->wallForPlayer[i].rect.left;
+                    int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
+                    int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
 
-            for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
-                points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
-                                              this->worldInfo->wallForPlayer[i].points[k].y));
+                    temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+                    can_move_hor = can_move_hor && temp;
+                }
+
+                {
+                    new_x = p0.x;
+                    new_y = p0.y + p_new.y;
+
+                    bool temp;
+
+                    int y1 = this->worldInfo->wallForPlayer[i].rect.top;
+                    int x1 = this->worldInfo->wallForPlayer[i].rect.left;
+                    int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
+                    int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
+
+                    temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+                    can_move_ver = can_move_ver && temp;
+                }
             }
+            else if (this->worldInfo->wallForPlayer[i].type == "polygon")
+            {
+                float new_x;// = p0.x + p_new.x;
+                float new_y;// = p0.y + p_new.y;
 
-            sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
+                bool can_move = true;
+                new_x = p0.x + p_new.x;
+                new_y = p0.y + p_new.y;
 
-            //has collision with i-th rectangle
-            rbw::intPolygon * tmpPolygon;
-            if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
-            if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
-            else tmpPolygon = new rbw::intPolygon(tmp);
+                std::vector< sf::Vector2f > points;
 
-            sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
-            can_move_hor = can_move_hor && (pAns == sf::Vector2f(-1.0f, -1.0f));
-            delete tmpPolygon;
-        }
-        else
-        {
-            bool temp;
+                for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
+                    points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
+                                                  this->worldInfo->wallForPlayer[i].points[k].y));
+                }
 
-            int y1 = this->worldInfo->wallForPlayer[i].rect.top;
-            int x1 = this->worldInfo->wallForPlayer[i].rect.left;
-            int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
-            int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
+                sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
 
-            temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
-            can_move_hor = can_move_hor && temp;
+                //has collision with i-th rectangle
+                rbw::intPolygon * tmpPolygon;
+                if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
+                if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
+                else tmpPolygon = new rbw::intPolygon(tmp);
+
+                sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
+                can_move_ver = can_move_ver && (pAns == sf::Vector2f(-1.0f, -1.0f));
+                can_move_hor = can_move_hor && (pAns == sf::Vector2f(-1.0f, -1.0f));
+                delete tmpPolygon;
+            }
         }
     }
+    else
+    {
+        for (int i=0; i<(int) this->worldInfo->wallForBots.size(); i++){
+            if (this->worldInfo->wallForPlayer[i].type == "rect"){
+                {
+                    new_x = p0.x + p_new.x;
+                    new_y = p0.y;
 
-    bool can_move_ver = true;
-    new_x = p0.x;
-    new_y = p0.y + p_new.y;
-    for (int i=0; i< (int)this->worldInfo->wallForPlayer.size(); i++){
+                    bool temp;
 
-        /* Honestly, i have no fucking idea why this fucking algorithm
-         * doesnt work. I mean, rarely we can see some bugs on the corner
-         */
+                    int y1 = this->worldInfo->wallForBots[i].rect.top;
+                    int x1 = this->worldInfo->wallForBots[i].rect.left;
+                    int y2 = y1 + this->worldInfo->wallForBots[i].rect.height;
+                    int x2 = x1 + this->worldInfo->wallForBots[i].rect.width;
 
-        if (this->worldInfo->wallForPlayer[i].points.size() != 4){
-            std::vector< sf::Vector2f > points;
+                    temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+                    can_move_hor = can_move_hor && temp;
+                }
 
-            for (int k=0; k<(int) this->worldInfo->wallForPlayer[i].points.size(); k++){
-                points.push_back(sf::Vector2f(this->worldInfo->wallForPlayer[i].points[k].x,
-                                              this->worldInfo->wallForPlayer[i].points[k].y));
+                {
+                    new_x = p0.x;
+                    new_y = p0.y + p_new.y;
+
+                    bool temp;
+
+                    int y1 = this->worldInfo->wallForBots[i].rect.top;
+                    int x1 = this->worldInfo->wallForBots[i].rect.left;
+                    int y2 = y1 + this->worldInfo->wallForBots[i].rect.height;
+                    int x2 = x1 + this->worldInfo->wallForBots[i].rect.width;
+
+                    temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
+                    can_move_ver = can_move_ver && temp;
+                }
             }
-
-            sf::Rect< int > tmp = this->worldInfo->wallForPlayer[i].rect;
-
-            //has collision with i-th rectangle
-            rbw::intPolygon * tmpPolygon;
-            if (this->worldInfo->wallForPlayer[i].type == "rect") tmpPolygon = new rbw::intPolygon(tmp);
-            if (this->worldInfo->wallForPlayer[i].type == "polygon") tmpPolygon = new rbw::intPolygon(points);
-            else tmpPolygon = new rbw::intPolygon(tmp);
-
-            sf::Vector2f pAns = tmpPolygon->CheckIntersect(this->position, sf::Vector2f(new_x, new_y));
-            can_move_ver = can_move_ver && (pAns == sf::Vector2f(-1.0f, -1.0f));
-            delete tmpPolygon;
-        }
-        else
-        {
-            bool temp;
-
-            int y1 = this->worldInfo->wallForPlayer[i].rect.top;
-            int x1 = this->worldInfo->wallForPlayer[i].rect.left;
-            int y2 = y1 + this->worldInfo->wallForPlayer[i].rect.height;
-            int x2 = x1 + this->worldInfo->wallForPlayer[i].rect.width;
-
-            temp = ( !((new_y < y2) && (new_y > y1) && (new_x < x2) && (new_x > x1)) );
-            can_move_ver = can_move_ver && temp;
         }
     }
 
@@ -359,15 +376,16 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
         vec_a.y = tmpPosition.y - this->position.y;
         float distance = vec_a.x * vec_a.x + vec_a.y * vec_a.y;
         float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::HOMING_MISSILE_HITBOX_RADIUS;
-        if (distance < minDistance * minDistance){
-            isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));
+        if (distance < minDistance * minDistance){            
             if (tmpPlayer == this->owner){
+                isCollidingWithOwner = true;
                 if (this->firstCollideWithOwner) continue;
             }
-
-            *victim = tmpPlayer;
-            std::cout << "victim: " << (*victim)->GetPlayerName() << std::endl;
-            return this->position;
+            else{
+                *victim = tmpPlayer;
+                std::cout << "victim: " << (*victim)->GetPlayerName() << std::endl;
+                return this->position;
+            }
         }
         if (!isCollidingWithOwner)
             this->firstCollideWithOwner = false;
@@ -500,12 +518,16 @@ sf::Vector2f BouncingBomb::getCollisionWithPlayers(Player **victim)
         float distance = dv.x*dv.x + dv.y*dv.y;
         float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::BOUNCING_BOMB_HITBOX_RADIUS;
         if (distance < minDistance*minDistance){
-            isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));
+            //isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));
+            //std::cout << this->owner->GetPlayerName() << ": " << this->firstCollideWithOwner << std::endl;
             if (tmpPlayer == this->owner){
+                isCollidingWithOwner = true;
                 if (this->firstCollideWithOwner) continue;
             }
-            *victim = tmpPlayer;
-            return this->position;
+            else{
+                *victim = tmpPlayer;
+                return this->position;
+            }
         }
         if (!isCollidingWithOwner) this->firstCollideWithOwner = false;
     }
@@ -760,6 +782,7 @@ void WorldSimulator::Init(Level *level, float FPS)
     this->worldInfo.FPS = FPS;
     this->worldInfo.wallForPlayer = level->GetObjects("wall");
     this->worldInfo.wallForRocket = level->GetObjects("wrocket");
+    this->worldInfo.wallForBots = level->GetObjects("wbots");
 
     std::vector< Object > spawn = level->GetObjects("spawn");
     for (int i=0; i< (int)spawn.size(); i++){

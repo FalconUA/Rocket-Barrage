@@ -100,6 +100,7 @@ typedef struct {
     std::vector< rbw::Player* > Players;    
     std::vector< Object > wallForPlayer;
     std::vector< Object > wallForRocket;
+    std::vector< Object > wallForBots;
     std::vector< rbw::spawnPos* > spawnPositions;
     std::vector< std::string > WorldEvents;
 
