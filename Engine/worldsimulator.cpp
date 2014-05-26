@@ -255,6 +255,7 @@ HomingMissile::HomingMissile(Player *owner, Player *target, rbw::HM_ChainElement
     this->LocationInChain = location;
     this->worldInfo = worldInfo;
     this->haveToBeDestroyed = false;
+    this->firstCollideWithOwner = true;
     this->owner->HomingMissilesLeft--;
 }
 rbw::HomingMissile::~HomingMissile()
@@ -343,10 +344,10 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
 {
     *victim = NULL;        
 
+    bool isCollidingWithOwner = false;
     for (int i=0; i< (int)this->worldInfo->Players.size(); i++){
-        rbw::Player * tmpPlayer = this->worldInfo->Players[i];
-        if (tmpPlayer == this->owner)
-            continue;
+        rbw::Player * tmpPlayer = this->worldInfo->Players[i];        
+
         sf::Vector2f tmpPosition = tmpPlayer->GetPosition();
         sf::Vector2f vec_a;
         vec_a.x = tmpPosition.x - this->position.x;
@@ -354,10 +355,17 @@ sf::Vector2f HomingMissile::getExplosionPoint(Player **victim)
         float distance = vec_a.x * vec_a.x + vec_a.y * vec_a.y;
         float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::HOMING_MISSILE_HITBOX_RADIUS;
         if (distance < minDistance * minDistance){
+            isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer = this->owner));
+            if (tmpPlayer == this->owner){
+                if (this->firstCollideWithOwner) continue;
+            }
+
             *victim = tmpPlayer;
             std::cout << "victim: " << (*victim)->GetPlayerName() << std::endl;
             return this->position;
         }
+        if (!isCollidingWithOwner)
+            this->firstCollideWithOwner = false;
     }
 
     sf::Vector2f pAns = sf::Vector2f(-1.0f,-1.0f);
@@ -401,7 +409,8 @@ BouncingBomb::BouncingBomb(Player *owner, rbw::BB_ChainElement * location, World
     this->type = rbw::TYPE_BOUNCING_BOMB;
     this->LocationInChain = location;
     this->worldInfo = worldInfo;
-    this->haveToBeDestroyed = false;    
+    this->haveToBeDestroyed = false;
+    this->firstCollideWithOwner = true;
     this->owner->BouncingBombsLeft--;
 }
 BouncingBomb::~BouncingBomb()
@@ -477,19 +486,23 @@ void BouncingBomb::SimulateNextStep()
 sf::Vector2f BouncingBomb::getCollisionWithPlayers(Player **victim)
 {
     *victim = NULL;    
+    bool isCollidingWithOwner = false;
     for (int i=0; i< (int)this->worldInfo->Players.size(); i++){
-        rbw::Player * tmpPlayer = this->worldInfo->Players[i];
-
-        if (tmpPlayer == this->owner) continue;
+        rbw::Player * tmpPlayer = this->worldInfo->Players[i];        
 
         sf::Vector2f dv( tmpPlayer->GetPosition().x - this->position.x,
                          tmpPlayer->GetPosition().y - this->position.y );
         float distance = dv.x*dv.x + dv.y*dv.y;
         float minDistance = rbw::GameParam::PLAYER_HITBOX_RADIUS + rbw::GameParam::BOUNCING_BOMB_HITBOX_RADIUS;
         if (distance < minDistance*minDistance){
+            isCollidingWithOwner = (isCollidingWithOwner || (tmpPlayer == this->owner));
+            if (tmpPlayer == this->owner){
+                if (this->firstCollideWithOwner) continue;
+            }
             *victim = tmpPlayer;
             return this->position;
         }
+        if (!isCollidingWithOwner) this->firstCollideWithOwner = false;
     }
     return sf::Vector2f(-1,-1);
 }
@@ -1101,21 +1114,28 @@ std::vector< std::string > WorldSimulator::ExportEvents()
 bool WorldSimulator::RoundEnded(rbw::Team * WinningTeam)
 {
     bool allBlackAreDead = true;
+    int BlackNum = 0;
     for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
-        if (tmpPlayer->GetTeam() == rbw::TEAM_BLACK)
+        if (tmpPlayer->GetTeam() == rbw::TEAM_BLACK){
+            BlackNum++;
             allBlackAreDead = (allBlackAreDead && (tmpPlayer->isAlive() == false));
+        }
     }
     bool allWhiteAreDead = true;
+    int WhiteNum = 0;
     for (int i=0; i< (int)this->worldInfo.Players.size(); i++){
         rbw::Player * tmpPlayer = this->worldInfo.Players[i];
-        if (tmpPlayer->GetTeam() == rbw::TEAM_WHITE)
+        if (tmpPlayer->GetTeam() == rbw::TEAM_WHITE){
+            WhiteNum++;
             allWhiteAreDead = (allWhiteAreDead && (tmpPlayer->isAlive() == false));
+        }
     }
     if (allBlackAreDead && allWhiteAreDead) *WinningTeam = rbw::TEAM_NOTEAM;
     else if (allBlackAreDead) *WinningTeam = rbw::TEAM_WHITE;
     else if (allWhiteAreDead) *WinningTeam = rbw::TEAM_BLACK;
 
+    if (((WhiteNum == 0)&&(!allBlackAreDead))||((BlackNum == 0)&&(!allWhiteAreDead))) return false;
     return (allBlackAreDead || allWhiteAreDead);
 }
 

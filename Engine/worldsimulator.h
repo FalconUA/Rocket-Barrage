@@ -181,6 +181,7 @@ public:
     rbw::Player * GetTarget();
     bool HaveToBeDestroyed();
 private:
+    bool firstCollideWithOwner;
     bool haveToBeDestroyed;
     rbw::HM_ChainElement * LocationInChain;
     sf::Vector2f getExplosionPoint(rbw::Player ** victim);
@@ -197,9 +198,10 @@ public:
     ~BouncingBomb();
     void SimulateNextStep();
     rbw::Player * GetOwner();
-    bool HaveToBeDestroyed();
+    bool HaveToBeDestroyed();    
 private:
-    bool haveToBeDestroyed;
+    bool firstCollideWithOwner;
+    bool haveToBeDestroyed;    
     sf::Vector2f getCollisionWithPlayers(rbw::Player ** victim);
     sf::Vector2f getReflexVector();
     sf::Vector2f getExplosionPoint(rbw::Player ** victim);

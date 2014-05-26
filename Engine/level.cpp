@@ -308,7 +308,7 @@ std::cout << "creating vector\n";
 
 Object Level::GetObject(std::string name){
     // Только первый объект с заданным именем    
-    for (int i = 0; i < objects.size(); i++)
+    for (int i = 0; i < (int)objects.size(); i++)
         if (objects[i].name == name)
             return objects[i];
 }
@@ -318,7 +318,7 @@ std::vector<Object> Level::GetObjects(std::string name)
     // Все объекты с заданным именем
     std::vector<Object> vec;
 
-    for(int i = 0; i < objects.size(); i++)
+    for(int i = 0; i < (int)objects.size(); i++)
         if(objects[i].name == name)
             vec.push_back(objects[i]);    
     return vec;
@@ -332,8 +332,8 @@ sf::Vector2i Level::GetTileSize()
 void Level::Draw(sf::RenderWindow &window)
 {
     // Рисуем все тайлы (объекты НЕ рисуем!)
-    for(int layer = 0; layer < layers.size(); layer++)
-        for(int tile = 0; tile < layers[layer].tiles.size(); tile++)
+    for(int layer = 0; layer < (int)layers.size(); layer++)
+        for(int tile = 0; tile < (int)layers[layer].tiles.size(); tile++)
             window.draw(layers[layer].tiles[tile]);
 }
 int Level::GetHeight(){
