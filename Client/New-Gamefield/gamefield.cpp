@@ -53,7 +53,6 @@ GameField::GameField(QObject *client, bool isSingleGame):client(client),TimeStep
 
     this->renderInfo.window->setSize(sf::Vector2u(sf::VideoMode::getDesktopMode().width,
                                                   sf::VideoMode::getDesktopMode().height));
-    this->renderInfo.window->setPosition(sf::Vector2i(0,0));
     std::cout << "init completed!" << std::endl;
 }
 GameField::~GameField()

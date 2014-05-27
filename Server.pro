@@ -29,7 +29,8 @@ SOURCES += \
     Engine/graphicengine.cpp \
     \
     AI/evadefromtherocket.cpp \
-    AI/movetothevictim.cpp
+    AI/movetothevictim.cpp \
+    AI/botshoot.cpp
 
 HEADERS  += \
     Server/server.h \
@@ -47,7 +48,8 @@ HEADERS  += \
     Engine/rbwincludes.h \
     \
     AI/evadefromtherocket.h \
-    AI/movetothevictim.h
+    AI/movetothevictim.h \
+    AI/botshoot.h
 
  unix|win32: LIBS += -lsfml-window
 

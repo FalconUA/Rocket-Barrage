@@ -22,7 +22,7 @@ int main(int argc, char * argv[]){
     sf::VideoMode newmode = sf::VideoMode::getDesktopMode();
 
 
-    sf::RenderWindow window(sf::VideoMode(w + 200, h+25), "ROCKET BARRAGE",  sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode(w + 200, h+10), "ROCKET BARRAGE",  sf::Style::None);
     //window.setMouseCursorVisible(false);
 
     window.setVerticalSyncEnabled(true); // call it once, after creating the window
@@ -36,7 +36,8 @@ int main(int argc, char * argv[]){
     Game NewGame("FalconRT");
     NewGame.Init(&server, &window, &level);    
 
-    //window.setSize(sf::Vector2u(newmode.width, newmode.height));
+    window.setSize(sf::Vector2u(newmode.width, newmode.height));
+    window.setPosition(sf::Vector2i(0,0));
 
     sf::Clock clock;       
 

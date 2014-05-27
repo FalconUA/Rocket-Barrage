@@ -26,7 +26,7 @@ typedef struct {
 
 } GraphicObject;
 
-void DrawGraphicObject(sf::RenderWindow * window, GraphicObject * object);
+void DrawGraphicObject(sf::RenderWindow * window, GraphicObject * object, bool spray = false);
 }
 
 #endif // GRAPHICOBJECT_H

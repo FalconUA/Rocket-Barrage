@@ -5,6 +5,9 @@
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 
+const int X_MIN = 0, Y_MIN = 0;
+const int X_MAX = 0, Y_MAX = 0;
+
 namespace rbw
 {
 
@@ -17,6 +20,7 @@ namespace GameParam
     const int GRENADE_DAMAGE = 10;
 
     const int MAX_BOUNCE_NUMBER = 6;
+
     const float MAX_PLAYER_SPEED = 0.40f; // speed per milisecond, 0.36f is equal to 8 pixels per 60ms
     const float MAX_HOMING_MISSILE_SPEED = 0.50f; // speed per milisecond, 0.64f is equal to 12 pixels per 60ms
     const float MAX_BOUNCING_BOMB_SPEED = 0.50f; // speed per milisecond, 0.64f is equal to 12 pixels per 60ms
@@ -26,7 +30,7 @@ namespace GameParam
     const float GRENADE_RADIUS_OF_EFFECT = 150;
     const float GRENADE_RADIUS_OF_EFFECT_SQUARED = GRENADE_RADIUS_OF_EFFECT * GRENADE_RADIUS_OF_EFFECT; // equal to radius 200
 
-    const int MAX_NUMBER_OF_HOMING_MISSILES_ALLOWED = 8;
+    const int MAX_NUMBER_OF_HOMING_MISSILES_ALLOWED = 10;
     const int MAX_NUMBER_OF_BOUNCING_BOMBS_ALLOWED = 10;
     const int MAX_NUMBER_OF_GRENADES_ALLOWED = 3;
 
@@ -90,8 +94,8 @@ namespace Graphic{
         const std::string ModelPath = "Resources/models/";
         const std::string AnimationPath = "Resources/animations/";
     #else
-        const std::string ModelPath = "Resources\models\\";
-        const std::string AnimationPath = "Resources\animations\\";
+        const std::string ModelPath = "Resources\\models\\";
+        const std::string AnimationPath = "Resources\\animations\\";
     #endif
 
 }; // end of namespace graphic

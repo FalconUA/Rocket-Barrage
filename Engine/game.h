@@ -8,7 +8,9 @@
 #include <worldsimulator.h>
 #include <SFML/System.hpp>
 #include <graphicengine.h>
-#include <movetothevictim.h>
+#include <evadefromtherocket.h> //it's new
+#include <movetothevictim.h>    //it's new
+#include <botshoot.h>   //it's new
 
 using namespace rbw;
 
@@ -39,7 +41,10 @@ private:
     bool ShowScore;
 
     std::vector<TRectangle> getWalls(); //it's new
-    MoveToTheVictim * moveToTheVictim;  //it's new
+    void botyara(MoveToTheVictim * moveToTheVictim, std::vector<TPair_PlayerDirection> &directions, Team team_name, bool shoot_function);   //it's new
+    MoveToTheVictim * moveToTheVictim,/*temporary*/
+        * moveToTheVictim_first_team, * moveToTheVictim_second_team;  //it's new
+    TSafeDirections getSafeDirections(rbw::Player botyara, TVector real_speed);  //it's new
 };
 
 #endif // GAME_H

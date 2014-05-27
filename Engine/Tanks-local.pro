@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     worldphysic.cpp \
     graphicengine.cpp \
     ../AI/evadefromtherocket.cpp \
-    ../AI/movetothevictim.cpp
+    ../AI/movetothevictim.cpp \
+    ../AI/botshoot.cpp
 
 unix|win32: LIBS += -lsfml-window
 
@@ -44,6 +45,8 @@ HEADERS += \
     rbwincludes.h \
     ../AI/evadefromtherocket.h \
     ../AI/movetothevictim.h \
-    converter.h
+    converter.h \
+    ../AI/botshoot.h \
+    worldtypes.h
 
 OTHER_FILES +=

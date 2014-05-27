@@ -6,6 +6,8 @@
 #include <vector>
 #include <graphicobject.h>
 #include <worldconstant.h>
+#include <worldtypes.h> //it's new
+//#include <evadefromtherocket.h>   //it's new
 #include <worldphysic.h>
 #include <SFML/Graphics.hpp>
 
@@ -98,9 +100,11 @@ typedef struct {
     Level * level;
 
     std::vector< rbw::Player* > Players;    
+
     std::vector< Object > wallForPlayer;
     std::vector< Object > wallForRocket;
     std::vector< Object > wallForBots;
+
     std::vector< rbw::spawnPos* > spawnPositions;
     std::vector< std::string > WorldEvents;
 
@@ -117,15 +121,16 @@ public:
     rbw::ObjectType GetType();
     sf::Vector2f GetSpeed();    
     rbw::WorldInformation * const getWorldInfo();
+    rbw::WorldInformation * worldInfo;//it's new
 
 protected:
     sf::Vector2f position;
     sf::Vector2f speed;
     rbw::ObjectType type;
-    rbw::WorldInformation * worldInfo;
+    //rbw::WorldInformation * worldInfo;
 };
 
-
+class WorldSimulator;   //it's new
 
 class Player: public WorldObject
 {
@@ -134,7 +139,7 @@ public:
            rbw::Team team,
            rbw::spawnPos * spawnPosition,
            rbw::WorldInformation * worldInfo,
-           bool bot);   //it's new
+           bool bot, WorldSimulator * server);   //it's new
     std::string GetPlayerName();
 
     void Move(sf::Vector2i direction);
@@ -146,7 +151,12 @@ public:
     bool Hit(int damage); // the true result means that this player was killed right after calling this function
     bool bot(); //true if bot; false if real player;
                 //it's new
+    void SetAdmissibleDirections(TSafeDirections &directions);
+    //TSafeDirections getSafeDirections(TVector real_speed);
+    void SetNewName(std::string name);  //it's new
 
+    sf::Vector2i lastDirection;//it's new;
+    WorldSimulator * server;    //it's new
 
     int Kill;
     int Death;    
@@ -165,6 +175,8 @@ private:
 
     bool BOT;   //true if bot; false if real player;
                 //it's new
+    TSafeDirections safe_directions;    //it's new
+
     rbw::spawnPos * spawnPosition;
 };
 
@@ -199,10 +211,10 @@ public:
     ~BouncingBomb();
     void SimulateNextStep();
     rbw::Player * GetOwner();
-    bool HaveToBeDestroyed();    
+    bool HaveToBeDestroyed();
 private:
+    bool haveToBeDestroyed;
     bool firstCollideWithOwner;
-    bool haveToBeDestroyed;    
     sf::Vector2f getCollisionWithPlayers(rbw::Player ** victim);
     sf::Vector2f getReflexVector();
     sf::Vector2f getExplosionPoint(rbw::Player ** victim);
@@ -223,6 +235,7 @@ public:
     rbw::Player * GetOwner();
     bool HaveToBeDestroyed();
     float GetZoom();
+    sf::Vector2f DestinationPoint;//it's new
 private:
     bool haveToBeDestroyed;
     rbw::Player * owner;
@@ -231,7 +244,7 @@ private:
     float zoom_coefficient;
     sf::Vector2f ProjectionToGround;
     sf::Vector2f StartingPoint;
-    sf::Vector2f DestinationPoint;
+    //sf::Vector2f DestinationPoint; //it's new
     sf::Vector3f Equation;
 };
 
@@ -259,7 +272,7 @@ public:
     bool RoundEnded(rbw::Team * WinningTeam);
     bool RoundDraw();
     rbw::WorldInformation * const getWorldInfo();
-private:    
+//private:    //it's new(about comment)
     rbw::WorldInformation worldInfo;    
 };
 

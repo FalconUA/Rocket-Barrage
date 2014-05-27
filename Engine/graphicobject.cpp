@@ -8,7 +8,7 @@
 namespace rbw
 {
 
-void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object){
+void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object, bool spray){
     if (object->type == rbw::Graphic::PLAYER){
         sf::CircleShape circle;
         if (object->team == rbw::TEAM_BLACK)
@@ -81,11 +81,43 @@ void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object){
         right_hor.setSize(sf::Vector2f(6.0f, 1.0f));
         right_hor.setOutlineThickness(1.0f);
         right_hor.setOutlineColor(sf::Color::Black);
-        right_hor.setPosition(sf::Vector2f(object->x + 4, object->y));
+        right_hor.setPosition(sf::Vector2f(object->x + 4, object->y));        
+
         window->draw(up_ver);
         window->draw(down_ver);
         window->draw(left_hor);
-        window->draw(right_hor);
+        window->draw(right_hor);        
+
+        if (spray)
+        {
+            sf::CircleShape aim_bor_out;
+            aim_bor_out.setFillColor(sf::Color::Transparent);
+            aim_bor_out.setRadius(12.0);
+            aim_bor_out.setOutlineColor(sf::Color::Black);
+            aim_bor_out.setOutlineThickness(1.5);
+            aim_bor_out.setOrigin(12.0,12.0);
+            aim_bor_out.setPosition(object->x, object->y);
+
+            sf::CircleShape aim_bor_in;
+            aim_bor_out.setFillColor(sf::Color::Transparent);
+            aim_bor_out.setRadius(15.0);
+            aim_bor_out.setOutlineColor(sf::Color::Black);
+            aim_bor_out.setOutlineThickness(1.5);
+            aim_bor_out.setOrigin(15.0,15.0);
+            aim_bor_out.setPosition(object->x, object->y);
+
+            sf::CircleShape aim;
+            aim.setFillColor(sf::Color::Transparent);
+            aim.setRadius(13.0);
+            aim.setOutlineColor(sf::Color::Green);
+            aim.setOutlineThickness(2);
+            aim.setOrigin(13, 13);
+            aim.setPosition(object->x, object->y);
+
+            window->draw(aim);
+            window->draw(aim_bor_in);
+            window->draw(aim_bor_out);
+        }
     }
     if (object->type == rbw::Graphic::MOUSE_POINTER_SWITCHED){
         sf::RectangleShape up_ver;
@@ -137,6 +169,36 @@ void DrawGraphicObject(sf::RenderWindow *window, GraphicObject *object){
                                         object->y - rbw::GameParam::GRENADE_RADIUS_OF_EFFECT + 16.0f));
         window->draw(circle);
 
+        if (spray)
+        {
+            sf::CircleShape aim_bor_out;
+            aim_bor_out.setFillColor(sf::Color::Transparent);
+            aim_bor_out.setRadius(12.0);
+            aim_bor_out.setOutlineColor(sf::Color::Black);
+            aim_bor_out.setOutlineThickness(1.5);
+            aim_bor_out.setOrigin(12.0,12.0);
+            aim_bor_out.setPosition(object->x, object->y);
+
+            sf::CircleShape aim_bor_in;
+            aim_bor_out.setFillColor(sf::Color::Transparent);
+            aim_bor_out.setRadius(15.0);
+            aim_bor_out.setOutlineColor(sf::Color::Black);
+            aim_bor_out.setOutlineThickness(1.5);
+            aim_bor_out.setOrigin(15.0,15.0);
+            aim_bor_out.setPosition(object->x, object->y);
+
+            sf::CircleShape aim;
+            aim.setFillColor(sf::Color::Transparent);
+            aim.setRadius(13.0);
+            aim.setOutlineColor(sf::Color::Green);
+            aim.setOutlineThickness(2);
+            aim.setOrigin(13, 13);
+            aim.setPosition(object->x, object->y);
+
+            window->draw(aim);
+            window->draw(aim_bor_in);
+            window->draw(aim_bor_out);
+        }
     }
 }
 

@@ -118,7 +118,7 @@ bool GraphicEngine::initAnimations()
 
 bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
 {
-    for (int i=0; i< (int)graphicObjects.size(); i++){
+    for (int i=0; i<graphicObjects.size(); i++){
         GraphicObject * tmpObj = &graphicObjects[i];
         rbw::Graphic::modelData * data;
 
@@ -253,14 +253,14 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             newElement->animation = newExplosion;
 
             if (this->Explosions.Last == NULL){
-                std::cout << "LAST is NULL" << std::endl;
+                //std::cout << "LAST is NULL" << std::endl;it's new
                 this->Explosions.First = newElement;
                 this->Explosions.Last = newElement;
                 newElement->next = NULL;
                 newElement->prev = NULL;
             }
             else {
-                std::cout << "LAST is not NULL" << std::endl;
+                //std::cout << "LAST is not NULL" << std::endl;it's new
                 newElement->prev = this->Explosions.Last;
                 newElement->next = NULL;
                 this->Explosions.Last->next = newElement;
@@ -281,14 +281,14 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             newElement->animation = newExplosion;
 
             if (this->Explosions.Last == NULL){
-                std::cout << "LAST is NULL" << std::endl;
+                //std::cout << "LAST is NULL" << std::endl;it's new
                 this->Explosions.First = newElement;
                 this->Explosions.Last = newElement;
                 newElement->next = NULL;
                 newElement->prev = NULL;
             }
             else {
-                std::cout << "LAST is not NULL" << std::endl;
+                //std::cout << "LAST is not NULL" << std::endl;it's new
                 newElement->prev = this->Explosions.Last;
                 newElement->next = NULL;
                 this->Explosions.Last->next = newElement;
@@ -309,14 +309,14 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             newElement->animation = newExplosion;
 
             if (this->Explosions.Last == NULL){
-                std::cout << "LAST is NULL" << std::endl;
+                //std::cout << "LAST is NULL" << std::endl;it's new
                 this->Explosions.First = newElement;
                 this->Explosions.Last = newElement;
                 newElement->next = NULL;
                 newElement->prev = NULL;
             }
             else {
-                std::cout << "LAST is not NULL" << std::endl;
+                //std::cout << "LAST is not NULL" << std::endl;it's new
                 newElement->prev = this->Explosions.Last;
                 newElement->next = NULL;
                 this->Explosions.Last->next = newElement;
@@ -337,14 +337,14 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             newElement->animation = newExplosion;
 
             if (this->Explosions.Last == NULL){
-                std::cout << "LAST is NULL" << std::endl;
+                //std::cout << "LAST is NULL" << std::endl;it's new
                 this->Explosions.First = newElement;
                 this->Explosions.Last = newElement;
                 newElement->next = NULL;
                 newElement->prev = NULL;
             }
             else {
-                std::cout << "LAST is not NULL" << std::endl;
+                //std::cout << "LAST is not NULL" << std::endl;it's new
                 newElement->prev = this->Explosions.Last;
                 newElement->next = NULL;
                 this->Explosions.Last->next = newElement;
@@ -352,7 +352,7 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
             }
             continue;
         }
-        DrawGraphicObject(this->outputWindow, tmpObj);
+        DrawGraphicObject(this->outputWindow, tmpObj, false);
     }
 
     rbw::Graphic::AnimationChainElement * tmpElement = this->Explosions.First;
@@ -393,14 +393,14 @@ bool GraphicEngine::Render(std::vector< GraphicObject > graphicObjects)
 
 bool GraphicEngine::ShowEventList(std::vector<std::string> eventVector)
 {
-    for (int i=0; i< (int)eventVector.size(); i++){
+    for (int i=0; i<eventVector.size(); i++){
         this->eventList.push_back(eventVector[i]);
         if (this->eventList.size() > 35){
             this->eventList.erase(eventList.begin());
         }
     }
     std::string outputStr;
-    for (int i=0; i< (int)this->eventList.size(); i++)
+    for (int i=0; i<this->eventList.size(); i++)
         outputStr += this->eventList[i]+"\n";
 
     sf::Text tableText;
@@ -411,7 +411,6 @@ bool GraphicEngine::ShowEventList(std::vector<std::string> eventVector)
     tableText.setColor(sf::Color::Yellow);
 
     this->outputWindow->draw(tableText);
-    return true;
 }
 
 bool GraphicEngine::ShowScoreTable(std::vector< rbw::PlayerExportInformation > peiVector)

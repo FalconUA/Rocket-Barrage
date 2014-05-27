@@ -30,7 +30,8 @@ SOURCES += \
     Engine/graphicengine.cpp \
     \
     AI/evadefromtherocket.cpp \
-    AI/movetothevictim.cpp
+    AI/movetothevictim.cpp \
+    AI/botshoot.cpp
 
 HEADERS  += \
     Client/game1.h \
@@ -48,7 +49,8 @@ HEADERS  += \
     Engine/rbwincludes.h \
     \
     AI/evadefromtherocket.h \
-    AI/movetothevictim.h
+    AI/movetothevictim.h \
+    AI/botshoot.h
 
 INCLUDEPATH += Tiled/
 
