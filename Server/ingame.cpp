@@ -189,7 +189,9 @@ std::string peiVector_to_string(std::vector< rbw::PlayerExportInformation > * pe
 
 //====================Move=this=world========================================
 float InGame::MoveThisWorld()//QTimerEvent* event,TimerEvent,MoveThisWorld ((^.^)>)>)>)>>
-{        
+{    
+
+
     float ElapsedTime = this->renderInfo.world->SimulateNextStep();
 
     std::vector< rbw::GraphicObject >* objects=new std::vector< rbw::GraphicObject >;

@@ -14,7 +14,7 @@ GameField::GameField(QObject *client, bool isSingleGame):client(client),TimeStep
     int h = this->renderInfo.level.GetHeight();
     int w = this->renderInfo.level.GetWidth();
 
-    this->renderInfo.window = new sf::RenderWindow(sf::VideoMode(w + 200, h), "ROCKET BARRAGE", sf::Style::None);
+    this->renderInfo.window = new sf::RenderWindow(sf::VideoMode(w + 200, h+20), "ROCKET BARRAGE", sf::Style::None);
     this->renderInfo.originalWinSize = this->renderInfo.window->getSize();
 
     std::cout << "window Created" << std::endl;
@@ -22,6 +22,7 @@ GameField::GameField(QObject *client, bool isSingleGame):client(client),TimeStep
 
     this->renderInfo.window->setVerticalSyncEnabled(true); // call it once, after creating the window
     //window.setFramerateLimit(FPS); // call it once, after creating the window
+
 
     this->renderInfo.window->setMouseCursorVisible(false);
 
@@ -54,6 +55,7 @@ GameField::GameField(QObject *client, bool isSingleGame):client(client),TimeStep
     this->renderInfo.window->setSize(sf::Vector2u(sf::VideoMode::getDesktopMode().width,
                                                   sf::VideoMode::getDesktopMode().height));
     this->renderInfo.window->setPosition(sf::Vector2i(0,0));
+
     std::cout << "init completed!" << std::endl;
 }
 GameField::~GameField()
