@@ -1,8 +1,8 @@
-### ROCKET BARRAGE!
+# ROCKET BARRAGE!
 
 Finally, after 2 weeks of hard work, we finished the engine, client-server and AI part, and here it is - the beta 1.0 unstable version! It still have plenty of bugs but i hope that we can fix it soon.    
 
-## Release log:
+### Release log:
 
 **27.05.2014** - [v1.0 beta "Prepare your ass"](https://github.com/FalconUA/Rocket-Barrage/releases/tag/v1.0-beta).  
 * Fixed critical bugs with bots  
