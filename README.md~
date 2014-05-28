@@ -3,7 +3,7 @@
 Finally, after 2 weeks of hard work, we finished the engine, client-server and AI part, and here it is - the beta 1.0 unstable version! It still have plenty of bugs but i hope that we can fix it soon.    
 
 **Engine and AI demonstration:**  
-<iframe width="560" height="315" src="//www.youtube.com/embed/54IVAy5K0wI" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https//www.youtube.com/embed/54IVAy5K0wI" frameborder="0" allowfullscreen></iframe>
 
 ### Release log:
 

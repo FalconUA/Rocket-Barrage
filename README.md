@@ -5,6 +5,8 @@ Finally, after 2 weeks of hard work, we finished the engine, client-server and A
 **Engine and AI demonstration:**  
 <iframe width="560" height="315" src="https//www.youtube.com/embed/54IVAy5K0wI" frameborder="0" allowfullscreen></iframe>
 
+[![___](http://img.youtube.com/vi/54IVAy5K0wI/0.jpg)](http://www.youtube.com/watch?v=54IVAy5K0wI)
+
 ### Release log:
 
 **27.05.2014** - [v1.0 beta "Prepare your ass"](https://github.com/FalconUA/Rocket-Barrage/releases/tag/v1.0-beta).  
