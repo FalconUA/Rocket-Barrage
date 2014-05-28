@@ -1196,7 +1196,11 @@ void Client::DestroyGameField()
     gamefield->deleteLater();
     gamefield=NULL;
     show();
-    ShowButton(1);
+    if(isSingleGame)
+    {
+        ShowButton(4);
+    }
+    else ShowButton(1);
 }
 
 //=============================================================
